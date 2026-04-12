@@ -1,15 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination';
-import {
     Table,
     TableBody,
     TableCell,
@@ -25,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { CreatePatientDialog } from './ui/create-patient-dialog';
 import { EditPatientDialog } from './ui/edit-patient-dialog';
 import { PatientsSortSelect } from './ui/patients-sort-select';
+import { DataPagination } from '@/components/common/data-pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -171,65 +163,7 @@ export default function PatientsPage() {
                     </Table>
                 </div>
 
-                <div className="mt-4 flex flex-col items-center justify-between gap-4 md:flex-row">
-                    <div className="text-sm text-muted-foreground">
-                        Mostrando {patients.from || 0} a {patients.to || 0} de{' '}
-                        {patients.total} registros
-                    </div>
-
-                    <Pagination className="mx-0 w-auto">
-                        <PaginationContent>
-                            {patients.links.map((link, i) => {
-                                const isPrevious =
-                                    link.label.includes('Previous');
-                                const isNext = link.label.includes('Next');
-
-                                if (!link.url && (isPrevious || isNext)) {
-                                    return null;
-                                }
-
-                                if (isPrevious) {
-                                    return (
-                                        <PaginationItem key={i}>
-                                            <PaginationPrevious
-                                                href={link.url || ''}
-                                            />
-                                        </PaginationItem>
-                                    );
-                                }
-
-                                if (isNext) {
-                                    return (
-                                        <PaginationItem key={i}>
-                                            <PaginationNext
-                                                href={link.url || ''}
-                                            />
-                                        </PaginationItem>
-                                    );
-                                }
-
-                                if (link.label === '...') {
-                                    return (
-                                        <PaginationItem key={i}>
-                                            <PaginationEllipsis />
-                                        </PaginationItem>
-                                    );
-                                }
-
-                                return (
-                                    <PaginationItem key={i}>
-                                        <PaginationLink
-                                            href={link.url || ''}
-                                            isActive={link.active}
-                                        >
-                                            {link.label}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                );
-                            })}
-                        </PaginationContent>
-                    </Pagination>
-                </div>
+                <DataPagination data={patients} />
             </div>
         </AppLayout>
     );
