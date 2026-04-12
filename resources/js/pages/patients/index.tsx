@@ -8,6 +8,15 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type PaginatedData, type Patient } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
@@ -107,8 +116,55 @@ export default function PatientsPage() {
                     </Table>
                 </div>
 
-                <div className="mt-4 text-sm text-muted-foreground">
-                    Mostrando {patients.from || 0} a {patients.to || 0} de {patients.total} registros
+                <div className="mt-4 flex flex-col items-center justify-between gap-4 md:flex-row">
+                    <div className="text-sm text-muted-foreground">
+                        Mostrando {patients.from || 0} a {patients.to || 0} de {patients.total} registros
+                    </div>
+
+                    <Pagination className="mx-0 w-auto">
+                        <PaginationContent>
+                            {patients.links.map((link, i) => {
+                                const isPrevious = link.label.includes('Previous');
+                                const isNext = link.label.includes('Next');
+
+                                if (!link.url && (isPrevious || isNext)) {
+                                    return null;
+                                }
+
+                                if (isPrevious) {
+                                    return (
+                                        <PaginationItem key={i}>
+                                            <PaginationPrevious href={link.url || ''} />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                if (isNext) {
+                                    return (
+                                        <PaginationItem key={i}>
+                                            <PaginationNext href={link.url || ''} />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                if (link.label === '...') {
+                                    return (
+                                        <PaginationItem key={i}>
+                                            <PaginationEllipsis />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                return (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink href={link.url || ''} isActive={link.active}>
+                                            {link.label}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                );
+                            })}
+                        </PaginationContent>
+                    </Pagination>
                 </div>
             </div>
         </AppLayout>
