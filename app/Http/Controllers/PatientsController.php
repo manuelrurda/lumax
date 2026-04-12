@@ -17,7 +17,7 @@ class PatientsController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = Patient::select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at');
+        $query = $request->user()->patients()->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -53,8 +53,12 @@ class PatientsController extends Controller
     /**
      * Display the specified patient.
      */
-    public function show(Patient $patient): Response
+    public function show(Request $request, Patient $patient): Response
     {
+        if ($patient->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
         return Inertia::render('patients/show', [
             'patient' => $patient,
         ]);
@@ -65,7 +69,7 @@ class PatientsController extends Controller
      */
     public function store(StorePatientRequest $request): RedirectResponse
     {
-        Patient::create($request->validated());
+        $request->user()->patients()->create($request->validated());
 
         return redirect()->route('patients')->with('message', 'Paciente guardado exitosamente.');
     }
@@ -75,6 +79,10 @@ class PatientsController extends Controller
      */
     public function update(UpdatePatientRequest $request, Patient $patient): RedirectResponse
     {
+        if ($patient->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
         $patient->update($request->validated());
 
         return redirect()->route('patients')->with('message', 'Paciente actualizado exitosamente.');

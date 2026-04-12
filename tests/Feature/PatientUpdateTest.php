@@ -15,6 +15,7 @@ class PatientUpdateTest extends TestCase
     {
         $user = User::factory()->create();
         $patient = Patient::create([
+            'user_id' => $user->id,
             'first_name' => 'Original First',
             'last_name' => 'Original Last',
             'phone' => '1111111111',
@@ -44,6 +45,7 @@ class PatientUpdateTest extends TestCase
     {
         $user = User::factory()->create();
         $patient = Patient::create([
+            'user_id' => $user->id,
             'first_name' => 'Original First',
             'last_name' => 'Original Last',
         ]);
@@ -62,6 +64,7 @@ class PatientUpdateTest extends TestCase
     {
         $user = User::factory()->create();
         $patient = Patient::create([
+            'user_id' => $user->id,
             'first_name' => 'Original',
             'last_name' => 'Original',
             'phone' => '1234567890',
@@ -86,7 +89,9 @@ class PatientUpdateTest extends TestCase
     
     public function test_unauthenticated_user_cannot_update_patient(): void
     {
+        $user = User::factory()->create();
         $patient = Patient::create([
+            'user_id' => $user->id,
             'first_name' => 'Original',
             'last_name' => 'Original',
         ]);

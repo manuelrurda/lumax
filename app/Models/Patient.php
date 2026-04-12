@@ -9,6 +9,7 @@ class Patient extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'user_id',
         'first_name',
         'last_name',
         'email',
@@ -21,5 +22,10 @@ class Patient extends Model
         return [
             'antecedentes' => 'array',
         ];
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -17,16 +17,40 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'test@example.com'],
             [
                 'first_name' => 'Test',
                 'last_name' => 'User',
+                'rfc' => 'ROUM010315B27',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         );
+        Patient::factory()->count(20)->create(['user_id' => $user->id]);
 
-        Patient::factory()->count(20)->create();
+        $drHouse = User::firstOrCreate(
+            ['email' => 'house@example.com'],
+            [
+                'first_name' => 'Gregory',
+                'last_name' => 'House',
+                'rfc' => 'HOUS590611X1A',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        Patient::factory()->count(5)->create(['user_id' => $drHouse->id]);
+
+        $drStrange = User::firstOrCreate(
+            ['email' => 'strange@example.com'],
+            [
+                'first_name' => 'Stephen',
+                'last_name' => 'Strange',
+                'rfc' => 'STRS301111MAG',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        Patient::factory()->count(15)->create(['user_id' => $drStrange->id]);
     }
 }
