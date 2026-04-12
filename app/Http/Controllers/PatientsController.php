@@ -17,13 +17,24 @@ class PatientsController extends Controller
      */
     public function index(Request $request): Response
     {
-        $patients = Patient::select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $query = Patient::select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
+            ->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                  ->orWhere('last_name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $patients = $query->paginate(10)->withQueryString();
 
         return Inertia::render('patients/index', [
             'patients' => $patients,
+            'filters' => $request->only('search'),
         ]);
     }
 

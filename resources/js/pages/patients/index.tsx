@@ -1,14 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import {
     Pagination,
     PaginationContent,
     PaginationEllipsis,
@@ -17,10 +9,19 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type PaginatedData, type Patient } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ExternalLink, Search, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { CreatePatientDialog } from './ui/create-patient-dialog';
 import { EditPatientDialog } from './ui/edit-patient-dialog';
 
@@ -32,7 +33,29 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function PatientsPage() {
-    const { patients } = usePage<{ patients: PaginatedData<Patient> }>().props;
+    const { patients, filters } = usePage<{
+        patients: PaginatedData<Patient>;
+        filters: { search?: string };
+    }>().props;
+    const [searchTerm, setSearchTerm] = useState(filters.search || '');
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (searchTerm !== (filters.search || '')) {
+                router.get(
+                    '/patients',
+                    { search: searchTerm },
+                    {
+                        preserveState: true,
+                        preserveScroll: true,
+                        replace: true,
+                    },
+                );
+            }
+        }, 800);
+
+        return () => clearTimeout(timeout);
+    }, [searchTerm, filters.search]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -52,6 +75,8 @@ export default function PatientsPage() {
                         <Input
                             placeholder="Buscar paciente..."
                             className="pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                     <CreatePatientDialog />
@@ -61,17 +86,24 @@ export default function PatientsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[300px]">Nombre</TableHead>
+                                <TableHead className="w-[300px]">
+                                    Nombre
+                                </TableHead>
                                 <TableHead>Teléfono</TableHead>
                                 <TableHead>Correo electrónico</TableHead>
                                 <TableHead>Última actualización</TableHead>
-                                <TableHead className="text-right">Acciones</TableHead>
+                                <TableHead className="text-right">
+                                    Acciones
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {patients.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                    <TableCell
+                                        colSpan={5}
+                                        className="py-8 text-center text-muted-foreground"
+                                    >
                                         No hay pacientes registrados.
                                     </TableCell>
                                 </TableRow>
@@ -79,15 +111,22 @@ export default function PatientsPage() {
                                 patients.data.map((patient) => (
                                     <TableRow key={patient.id}>
                                         <TableCell className="font-medium">
-                                            {patient.first_name} {patient.last_name}
+                                            {patient.first_name}{' '}
+                                            {patient.last_name}
                                         </TableCell>
-                                        <TableCell>{patient.phone || '-'}</TableCell>
-                                        <TableCell>{patient.email || '-'}</TableCell>
                                         <TableCell>
-                                            {new Date(patient.updated_at).toLocaleDateString('es-MX', {
+                                            {patient.phone || '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {patient.email || '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(
+                                                patient.updated_at,
+                                            ).toLocaleDateString('es-MX', {
                                                 year: 'numeric',
                                                 month: 'short',
-                                                day: 'numeric'
+                                                day: 'numeric',
                                             })}
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -99,7 +138,9 @@ export default function PatientsPage() {
                                                 >
                                                     <ExternalLink className="h-4 w-4" />
                                                 </Button>
-                                                <EditPatientDialog patient={patient} />
+                                                <EditPatientDialog
+                                                    patient={patient}
+                                                />
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -118,13 +159,15 @@ export default function PatientsPage() {
 
                 <div className="mt-4 flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="text-sm text-muted-foreground">
-                        Mostrando {patients.from || 0} a {patients.to || 0} de {patients.total} registros
+                        Mostrando {patients.from || 0} a {patients.to || 0} de{' '}
+                        {patients.total} registros
                     </div>
 
                     <Pagination className="mx-0 w-auto">
                         <PaginationContent>
                             {patients.links.map((link, i) => {
-                                const isPrevious = link.label.includes('Previous');
+                                const isPrevious =
+                                    link.label.includes('Previous');
                                 const isNext = link.label.includes('Next');
 
                                 if (!link.url && (isPrevious || isNext)) {
@@ -134,7 +177,9 @@ export default function PatientsPage() {
                                 if (isPrevious) {
                                     return (
                                         <PaginationItem key={i}>
-                                            <PaginationPrevious href={link.url || ''} />
+                                            <PaginationPrevious
+                                                href={link.url || ''}
+                                            />
                                         </PaginationItem>
                                     );
                                 }
@@ -142,7 +187,9 @@ export default function PatientsPage() {
                                 if (isNext) {
                                     return (
                                         <PaginationItem key={i}>
-                                            <PaginationNext href={link.url || ''} />
+                                            <PaginationNext
+                                                href={link.url || ''}
+                                            />
                                         </PaginationItem>
                                     );
                                 }
@@ -157,7 +204,10 @@ export default function PatientsPage() {
 
                                 return (
                                     <PaginationItem key={i}>
-                                        <PaginationLink href={link.url || ''} isActive={link.active}>
+                                        <PaginationLink
+                                            href={link.url || ''}
+                                            isActive={link.active}
+                                        >
                                             {link.label}
                                         </PaginationLink>
                                     </PaginationItem>
