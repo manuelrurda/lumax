@@ -17,8 +17,7 @@ class PatientsController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = Patient::select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
-            ->latest();
+        $query = Patient::select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -30,11 +29,24 @@ class PatientsController extends Controller
             });
         }
 
+        if ($request->filled('sort')) {
+            $sort = $request->sort;
+            if ($sort === 'name_asc') {
+                $query->orderBy('first_name', 'asc')->orderBy('last_name', 'asc');
+            } elseif ($sort === 'name_desc') {
+                $query->orderBy('first_name', 'desc')->orderBy('last_name', 'desc');
+            } else {
+                $query->latest();
+            }
+        } else {
+            $query->latest();
+        }
+
         $patients = $query->paginate(10)->withQueryString();
 
         return Inertia::render('patients/index', [
             'patients' => $patients,
-            'filters' => $request->only('search'),
+            'filters' => $request->only(['search', 'sort']),
         ]);
     }
 

@@ -24,6 +24,7 @@ import { ExternalLink, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreatePatientDialog } from './ui/create-patient-dialog';
 import { EditPatientDialog } from './ui/edit-patient-dialog';
+import { PatientsSortSelect } from './ui/patients-sort-select';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,16 +36,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function PatientsPage() {
     const { patients, filters } = usePage<{
         patients: PaginatedData<Patient>;
-        filters: { search?: string };
+        filters: { search?: string; sort?: string };
     }>().props;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
+    const [sortBy, setSortBy] = useState(filters.sort || 'latest');
+
+    const handleSortChange = (value: string) => {
+        setSortBy(value);
+        router.get(
+            '/patients',
+            { search: searchTerm, sort: value },
+            { preserveState: true, preserveScroll: true, replace: true }
+        );
+    };
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (searchTerm !== (filters.search || '')) {
                 router.get(
                     '/patients',
-                    { search: searchTerm },
+                    { search: searchTerm, sort: sortBy },
                     {
                         preserveState: true,
                         preserveScroll: true,
@@ -55,7 +66,7 @@ export default function PatientsPage() {
         }, 800);
 
         return () => clearTimeout(timeout);
-    }, [searchTerm, filters.search]);
+    }, [searchTerm, filters.search, sortBy]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -70,14 +81,17 @@ export default function PatientsPage() {
                 </div>
 
                 <div className="mb-4 flex items-center justify-between gap-4">
-                    <div className="relative flex-1">
-                        <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Buscar paciente..."
-                            className="pl-8"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div className="flex flex-1 items-center gap-4">
+                        <PatientsSortSelect value={sortBy} onValueChange={handleSortChange} />
+                        <div className="relative flex-1">
+                            <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Buscar paciente..."
+                                className="pl-8"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                     </div>
                     <CreatePatientDialog />
                 </div>
