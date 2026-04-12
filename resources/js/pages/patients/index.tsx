@@ -11,7 +11,8 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { Edit, ExternalLink, Plus, Search, Trash2 } from 'lucide-react';
+import { Edit, ExternalLink, Search, Trash2 } from 'lucide-react';
+import { CreatePatientDialog } from './ui/create-patient-dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,10 +42,7 @@ export default function PatientsPage() {
                             className="pl-8"
                         />
                     </div>
-                    <Button className="bg-lumax-purple text-white hover:bg-lumax-purple-accent">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Agregar
-                    </Button>
+                    <CreatePatientDialog />
                 </div>
 
                 <div className="rounded-md border bg-card">
