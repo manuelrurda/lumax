@@ -40,3 +40,23 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Patient {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string | null;
+    phone: string | null;
+    updated_at: string;
+}
+
+export interface PaginatedData<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    links: { url: string | null; label: string; active: boolean }[];
+}
