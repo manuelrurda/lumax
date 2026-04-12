@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePatientRequest;
+use App\Http\Requests\UpdatePatientRequest;
 use App\Models\Patient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,5 +35,15 @@ class PatientsController extends Controller
         Patient::create($request->validated());
 
         return redirect()->route('patients')->with('message', 'Paciente guardado exitosamente.');
+    }
+
+    /**
+     * Update the specified patient in storage.
+     */
+    public function update(UpdatePatientRequest $request, Patient $patient): RedirectResponse
+    {
+        $patient->update($request->validated());
+
+        return redirect()->route('patients')->with('message', 'Paciente actualizado exitosamente.');
     }
 }
