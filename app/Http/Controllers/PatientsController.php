@@ -46,7 +46,17 @@ class PatientsController extends Controller
 
         return Inertia::render('patients/index', [
             'patients' => $patients,
-            'filters' => $request->only(['search', 'sort']),
+            'filters' => (object) $request->only(['search', 'sort']),
+        ]);
+    }
+
+    /**
+     * Display the specified patient.
+     */
+    public function show(Patient $patient): Response
+    {
+        return Inertia::render('patients/show', [
+            'patient' => $patient,
         ]);
     }
 

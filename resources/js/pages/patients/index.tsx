@@ -1,3 +1,4 @@
+import { DataPagination } from '@/components/common/data-pagination';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,7 +17,6 @@ import { useEffect, useState } from 'react';
 import { CreatePatientDialog } from './ui/create-patient-dialog';
 import { EditPatientDialog } from './ui/edit-patient-dialog';
 import { PatientsSortSelect } from './ui/patients-sort-select';
-import { DataPagination } from '@/components/common/data-pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,15 +30,15 @@ export default function PatientsPage() {
         patients: PaginatedData<Patient>;
         filters: { search?: string; sort?: string };
     }>().props;
-    const [searchTerm, setSearchTerm] = useState(filters.search || '');
-    const [sortBy, setSortBy] = useState(filters.sort || 'latest');
+    const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+    const [sortBy, setSortBy] = useState(typeof filters?.sort === 'string' ? filters.sort : 'latest');
 
     const handleSortChange = (value: string) => {
         setSortBy(value);
         router.get(
             '/patients',
             { search: searchTerm, sort: value },
-            { preserveState: true, preserveScroll: true, replace: true }
+            { preserveState: true, preserveScroll: true, replace: true },
         );
     };
 
@@ -74,7 +74,10 @@ export default function PatientsPage() {
 
                 <div className="mb-4 flex items-center justify-between gap-4">
                     <div className="flex flex-1 items-center gap-4">
-                        <PatientsSortSelect value={sortBy} onValueChange={handleSortChange} />
+                        <PatientsSortSelect
+                            value={sortBy}
+                            onValueChange={handleSortChange}
+                        />
                         <div className="relative flex-1">
                             <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
                             <Input
@@ -115,7 +118,15 @@ export default function PatientsPage() {
                                 </TableRow>
                             ) : (
                                 patients.data.map((patient) => (
-                                    <TableRow key={patient.id}>
+                                    <TableRow
+                                        key={patient.id}
+                                        className="cursor-pointer transition-colors hover:bg-muted/50"
+                                        onClick={() =>
+                                            router.get(
+                                                `/patients/${patient.id}`,
+                                            )
+                                        }
+                                    >
                                         <TableCell className="font-medium">
                                             {patient.first_name}{' '}
                                             {patient.last_name}
@@ -136,11 +147,21 @@ export default function PatientsPage() {
                                             })}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
+                                            <div
+                                                className="flex justify-end gap-2"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                    onClick={() =>
+                                                        router.get(
+                                                            `/patients/${patient.id}`,
+                                                        )
+                                                    }
                                                 >
                                                     <ExternalLink className="h-4 w-4" />
                                                 </Button>
