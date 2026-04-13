@@ -9,7 +9,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Patient } from '@/types';
 import { LoaderCircle, Plus, Save, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
@@ -17,12 +16,13 @@ import {
     AntecedentesNoPatologicosForm,
     defaultAntecedentes,
     TipoSangre,
+    PatientAntecedentesTab
 } from '../schemas/antecedentes-form';
 
 export function AntecedentesNoPatologicosTab({
     patient,
 }: {
-    patient: Patient;
+    patient: PatientAntecedentesTab;
 }) {
     const [isSaving, setIsSaving] = useState(false);
 

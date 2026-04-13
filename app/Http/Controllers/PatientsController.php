@@ -53,11 +53,11 @@ class PatientsController extends Controller
     /**
      * Display the specified patient.
      */
-    public function show(Request $request, Patient $patient): Response
+    public function show(Request $request, $id): Response
     {
-        if ($patient->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $patient = Patient::where('user_id', $request->user()->id)
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes', 'updated_at')
+            ->findOrFail($id);
 
         return Inertia::render('patients/show', [
             'patient' => $patient,

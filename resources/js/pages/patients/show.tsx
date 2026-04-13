@@ -1,10 +1,11 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Patient } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { PatientRecordLayout } from './ui/patient-record-layout';
 import { AntecedentesNoPatologicosTab } from './ui/antecedentes-no-patologicos-form';
+import { PatientAntecedentesTab } from './schemas/antecedentes-form';
 
-export default function PatientShow({ patient }: { patient: Patient }) {
+export default function PatientShow({ patient }: { patient: PatientAntecedentesTab }) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Pacientes',

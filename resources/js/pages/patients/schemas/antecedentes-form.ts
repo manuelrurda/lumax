@@ -1,3 +1,5 @@
+import { Patient } from '@/types';
+
 export type TipoSangre = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | '';
 
 export interface AntecedentesNoPatologicosForm {
@@ -24,4 +26,8 @@ export const defaultAntecedentes: AntecedentesNoPatologicosForm = {
     alergias: 'Ninguna',
     perinatales: 'Ninguno',
     otros: [],
+};
+
+export type PatientAntecedentesTab = Patient & {
+    antecedentes?: AntecedentesNoPatologicosForm | null;
 };
