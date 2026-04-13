@@ -35,9 +35,9 @@ export function AntecedentesNoPatologicosTab({
     } = useForm<AntecedentesNoPatologicosForm>({
         defaultValues: {
             ...defaultAntecedentes,
-            ...(patient.antecedentes || {}),
+            ...(patient.antecedentes_no_patologicos || {}),
             tipo_sangre:
-                (patient.antecedentes?.tipo_sangre as TipoSangre) || '',
+                (patient.antecedentes_no_patologicos?.tipo_sangre as TipoSangre) || '',
         } as AntecedentesNoPatologicosForm,
     });
 

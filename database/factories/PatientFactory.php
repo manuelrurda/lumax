@@ -14,7 +14,7 @@ class PatientFactory extends Factory
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->numerify('1#########'),
-            'antecedentes' => null,
+            'antecedentes_no_patologicos' => null,
         ];
     }
 }

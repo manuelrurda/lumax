@@ -29,5 +29,5 @@ export const defaultAntecedentes: AntecedentesNoPatologicosForm = {
 };
 
 export type PatientAntecedentesTab = Patient & {
-    antecedentes?: AntecedentesNoPatologicosForm | null;
+    antecedentes_no_patologicos?: AntecedentesNoPatologicosForm | null;
 };
