@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Patient } from '@/types';
 import { Head } from '@inertiajs/react';
 import { PatientRecordLayout } from './ui/patient-record-layout';
+import { AntecedentesNoPatologicosTab } from './ui/antecedentes-no-patologicos-form';
 
 export default function PatientShow({ patient }: { patient: Patient }) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -20,29 +21,7 @@ export default function PatientShow({ patient }: { patient: Patient }) {
             <Head title={`Expediente: ${patient.first_name}`} />
             
             <PatientRecordLayout patient={patient} currentTab="info">
-                <div className="grid gap-6 md:grid-cols-2">
-                    <div className="rounded-xl border bg-card p-6 shadow-sm">
-                        <h2 className="text-lg font-semibold mb-4">Datos Personales</h2>
-                        <ul className="space-y-3 text-sm">
-                            <li>
-                                <span className="font-medium text-muted-foreground mr-2">Nombres:</span> 
-                                {patient.first_name}
-                            </li>
-                            <li>
-                                <span className="font-medium text-muted-foreground mr-2">Apellidos:</span> 
-                                {patient.last_name}
-                            </li>
-                            <li>
-                                <span className="font-medium text-muted-foreground mr-2">Teléfono:</span> 
-                                {patient.phone || '-'}
-                            </li>
-                            <li>
-                                <span className="font-medium text-muted-foreground mr-2">Correo:</span> 
-                                {patient.email || '-'}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <AntecedentesNoPatologicosTab patient={patient} />
             </PatientRecordLayout>
         </AppLayout>
     );
