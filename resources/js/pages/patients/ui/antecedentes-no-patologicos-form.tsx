@@ -12,6 +12,7 @@ import {
 import { LoaderCircle, Plus, Save, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { router } from '@inertiajs/react';
 import {
     AntecedentesNoPatologicosForm,
     defaultAntecedentes,
@@ -31,6 +32,7 @@ export function AntecedentesNoPatologicosTab({
         control,
         handleSubmit,
         watch,
+        reset,
         formState: { isDirty },
     } = useForm<AntecedentesNoPatologicosForm>({
         defaultValues: {
@@ -54,12 +56,19 @@ export function AntecedentesNoPatologicosTab({
 
     const onSubmit = (data: AntecedentesNoPatologicosForm) => {
         setIsSaving(true);
-        console.log('Form data:', data);
+        console.log('Enviando datos...', data);
 
-        // Simular petición para enfocarnos solo en UI
-        setTimeout(() => {
-            setIsSaving(false);
-        }, 800);
+        router.put(`/patients/${patient.id}`, {
+            ...patient,
+            antecedentes_no_patologicos: data
+        } as any, {
+            onSuccess: () => {
+                setIsSaving(false);
+                reset({}, { keepValues: true }); // Reset isDirty state
+            },
+            onError: () => setIsSaving(false),
+            preserveScroll: true
+        });
     };
 
     return (

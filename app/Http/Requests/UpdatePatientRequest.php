@@ -18,6 +18,7 @@ class UpdatePatientRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'regex:/^[0-9]+$/', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
+            'antecedentes_no_patologicos' => ['nullable', 'array'],
         ];
     }
 
