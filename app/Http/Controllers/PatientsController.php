@@ -85,6 +85,6 @@ class PatientsController extends Controller
 
         $patient->update($request->validated());
 
-        return redirect()->route('patients')->with('message', 'Paciente actualizado exitosamente.');
+        return back()->with('message', 'Paciente actualizado exitosamente.');
     }
 }

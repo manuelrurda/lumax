@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Patient } from '@/types';
 import { Head } from '@inertiajs/react';
-import { PatientProfileLayout } from './ui/patient-profile-layout';
+import { PatientRecordLayout } from './ui/patient-record-layout';
 
 export default function PatientShow({ patient }: { patient: Patient }) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -19,7 +19,7 @@ export default function PatientShow({ patient }: { patient: Patient }) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Expediente: ${patient.first_name}`} />
             
-            <PatientProfileLayout patient={patient} currentTab="info">
+            <PatientRecordLayout patient={patient} currentTab="info">
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="rounded-xl border bg-card p-6 shadow-sm">
                         <h2 className="text-lg font-semibold mb-4">Datos Personales</h2>
@@ -43,7 +43,7 @@ export default function PatientShow({ patient }: { patient: Patient }) {
                         </ul>
                     </div>
                 </div>
-            </PatientProfileLayout>
+            </PatientRecordLayout>
         </AppLayout>
     );
 }

@@ -22,11 +22,11 @@ class PatientUpdateTest extends TestCase
             'email' => 'original@ejemplo.com',
         ]);
 
-        $response = $this->actingAs($user)->put("/patients/{$patient->id}", [
+        $response = $this->actingAs($user)->from('/patients')->put("/patients/{$patient->id}", [
             'first_name' => 'Updated First',
             'last_name' => 'Updated Last',
             'phone' => '2222222222',
-            'email' => 'updated@ejemplo.com',
+            'email' => 'updated@example.com',
         ]);
 
         $response->assertRedirect('/patients');
@@ -37,7 +37,7 @@ class PatientUpdateTest extends TestCase
             'first_name' => 'Updated First',
             'last_name' => 'Updated Last',
             'phone' => '2222222222',
-            'email' => 'updated@ejemplo.com',
+            'email' => 'updated@example.com',
         ]);
     }
 
@@ -71,14 +71,14 @@ class PatientUpdateTest extends TestCase
             'email' => 'test@ejemplo.com',
         ]);
 
-        $response = $this->actingAs($user)->put("/patients/{$patient->id}", [
+        $response = $this->actingAs($user)->from("/patients/{$patient->id}")->put("/patients/{$patient->id}", [
             'first_name' => 'Updated',
             'last_name' => 'Updated',
             'phone' => null,
             'email' => null,
         ]);
 
-        $response->assertRedirect('/patients');
+        $response->assertRedirect("/patients/{$patient->id}");
         
         $this->assertDatabaseHas('patients', [
             'id' => $patient->id,
