@@ -7,6 +7,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patients', [PatientsController::class, 'index'])->name('patients');
     Route::post('/patients', [PatientsController::class, 'store'])->name('patients.store');
     Route::get('/patients/{patient}', [PatientsController::class, 'show'])->name('patients.show');
+    Route::get('/patients/{patient}/oftalmologicos', [PatientsController::class, 'oftalmologicos'])->name('patients.oftalmologicos');
     Route::put('/patients/{patient}', [PatientsController::class, 'update'])->name('patients.update');
 });
 
