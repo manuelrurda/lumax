@@ -70,7 +70,7 @@ class PatientsController extends Controller
     public function oftalmologicos(Request $request, $id): Response
     {
         $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes_oftalmologicos', 'updated_at')
             ->findOrFail($id);
 
         return Inertia::render('patients/oftalmologicos', [

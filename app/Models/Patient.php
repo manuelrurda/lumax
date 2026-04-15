@@ -15,12 +15,14 @@ class Patient extends Model
         'email',
         'phone',
         'antecedentes',
+        'antecedentes_oftalmologicos',
     ];
 
     protected function casts(): array
     {
         return [
             'antecedentes' => 'array',
+            'antecedentes_oftalmologicos' => 'array',
         ];
     }
 

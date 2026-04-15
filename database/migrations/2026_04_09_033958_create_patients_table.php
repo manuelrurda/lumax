@@ -23,6 +23,7 @@ return new class extends Migration
             
             // Datos médicos flexibles
             $table->jsonb('antecedentes')->nullable();
+            $table->jsonb('antecedentes_oftalmologicos')->nullable();
             
             $table->timestamps();
         });
