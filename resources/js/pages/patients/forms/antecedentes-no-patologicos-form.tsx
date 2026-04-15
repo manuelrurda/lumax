@@ -1,13 +1,24 @@
-import React from 'react';
-import { Control, UseFormRegister, UseFormWatch, useFieldArray, Controller } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Plus, Trash2 } from 'lucide-react';
-import { AntecedentesForm } from '../schemas/antecedentes-form';
+import {
+    Control,
+    Controller,
+    UseFormRegister,
+    UseFormWatch,
+    useFieldArray,
+} from 'react-hook-form';
+import { AntecedentesForm } from '../schemas/antecedentes';
 
 export interface FormSectionProps {
     register: UseFormRegister<AntecedentesForm>;
@@ -15,12 +26,16 @@ export interface FormSectionProps {
     watch: UseFormWatch<AntecedentesForm>;
 }
 
-export function AntecedentesNoPatologicosForm({ register, control, watch }: FormSectionProps) {
+export function AntecedentesNoPatologicosForm({
+    register,
+    control,
+    watch,
+}: FormSectionProps) {
     const watchOtros = watch('antecedentes_no_patologicos.otros') || [];
     const isLastRowInvalid =
         watchOtros.length > 0 &&
         (!watchOtros[watchOtros.length - 1]?.key?.trim() ||
-         !watchOtros[watchOtros.length - 1]?.value?.trim());
+            !watchOtros[watchOtros.length - 1]?.value?.trim());
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -30,8 +45,12 @@ export function AntecedentesNoPatologicosForm({ register, control, watch }: Form
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold text-lumax-purple">Antecedentes No Patológicos</h3>
-                <p className="text-sm text-muted-foreground mb-4">Hábitos, estilo de vida y detalles perinatales.</p>
+                <h3 className="text-lg font-semibold text-lumax-purple">
+                    Antecedentes No Patológicos
+                </h3>
+                <p className="mb-4 text-sm text-muted-foreground">
+                    Hábitos, estilo de vida y detalles perinatales.
+                </p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
@@ -194,16 +213,17 @@ export function AntecedentesNoPatologicosForm({ register, control, watch }: Form
                         )}
                     />
                 </div>
-
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mt-6 pb-4">
+            <div className="mt-6 grid grid-cols-1 gap-6 pb-4 md:grid-cols-2">
                 <div className="space-y-2">
                     <Label htmlFor="psicotropicos">Psicotrópicos</Label>
                     <Textarea
                         id="psicotropicos"
-                        className="resize-none h-24 bg-white"
-                        {...register('antecedentes_no_patologicos.psicotropicos')}
+                        className="h-24 resize-none bg-white"
+                        {...register(
+                            'antecedentes_no_patologicos.psicotropicos',
+                        )}
                         placeholder="Especifique si aplica"
                     />
                 </div>
@@ -212,28 +232,34 @@ export function AntecedentesNoPatologicosForm({ register, control, watch }: Form
                     <Label htmlFor="alergias">Alergia a medicamentos</Label>
                     <Textarea
                         id="alergias"
-                        className="resize-none h-24 bg-white"
+                        className="h-24 resize-none bg-white"
                         {...register('antecedentes_no_patologicos.alergias')}
                         placeholder="Especifique las alergias o 'Ninguna'"
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="perinatales">Antecedentes Perinatales</Label>
+                    <Label htmlFor="perinatales">
+                        Antecedentes Perinatales
+                    </Label>
                     <Textarea
                         id="perinatales"
-                        className="resize-none h-24 bg-white"
+                        className="h-24 resize-none bg-white"
                         {...register('antecedentes_no_patologicos.perinatales')}
                         placeholder="Detalles de antecedentes perinatales"
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="medicamentos_actuales">Medicamentos que utiliza actualmente</Label>
+                    <Label htmlFor="medicamentos_actuales">
+                        Medicamentos que utiliza actualmente
+                    </Label>
                     <Textarea
                         id="medicamentos_actuales"
-                        className="resize-none h-24 bg-white"
-                        {...register('antecedentes_no_patologicos.medicamentos_actuales')}
+                        className="h-24 resize-none bg-white"
+                        {...register(
+                            'antecedentes_no_patologicos.medicamentos_actuales',
+                        )}
                         placeholder="Liste los medicamentos o 'Ninguno'"
                     />
                 </div>
@@ -242,7 +268,9 @@ export function AntecedentesNoPatologicosForm({ register, control, watch }: Form
             {/* Dynamic Array 'Otros' */}
             <div className="mt-4 pt-4">
                 <div className="mb-4 flex items-center gap-4">
-                    <h4 className="text-base font-medium">Otras condiciones no patológicas</h4>
+                    <h4 className="text-base font-medium">
+                        Otras condiciones no patológicas
+                    </h4>
                     <Button
                         type="button"
                         variant="secondary"

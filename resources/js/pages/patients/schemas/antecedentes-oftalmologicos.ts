@@ -1,3 +1,5 @@
+import { Patient } from '@/types';
+
 export interface AntecedentesOftalmologicosForm {
     lentes_aereos: {
         ultima_refraccion: string;
@@ -15,19 +17,24 @@ export interface AntecedentesOftalmologicosForm {
     };
 }
 
-export const defaultAntecedentesOftalmologicos: AntecedentesOftalmologicosForm = {
-    lentes_aereos: {
-        ultima_refraccion: '',
-        gotas: '',
-        cirugias_previas: '',
-        glaucoma: '',
-    },
-    lentes_contacto: {
-        blandos: false,
-        rigidos: false,
-        ultima_refraccion: '',
-        trauma_ocular: '',
-        laser: '',
-        otros: '',
-    },
+export const defaultAntecedentesOftalmologicos: AntecedentesOftalmologicosForm =
+    {
+        lentes_aereos: {
+            ultima_refraccion: '',
+            gotas: '',
+            cirugias_previas: '',
+            glaucoma: '',
+        },
+        lentes_contacto: {
+            blandos: false,
+            rigidos: false,
+            ultima_refraccion: '',
+            trauma_ocular: '',
+            laser: '',
+            otros: '',
+        },
+    };
+
+export type PatientOftalmologicosTab = Patient & {
+    antecedentes_oftalmologicos?: AntecedentesOftalmologicosForm | null;
 };
