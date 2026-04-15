@@ -14,13 +14,13 @@ import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { router } from '@inertiajs/react';
 import {
-    AntecedentesNoPatologicosForm,
+    AntecedentesForm,
     defaultAntecedentes,
     TipoSangre,
     PatientAntecedentesTab
 } from '../schemas/antecedentes-form';
 
-export function AntecedentesNoPatologicosTab({
+export function AntecedentesTab({
     patient,
 }: {
     patient: PatientAntecedentesTab;
@@ -34,13 +34,13 @@ export function AntecedentesNoPatologicosTab({
         watch,
         reset,
         formState: { isDirty },
-    } = useForm<AntecedentesNoPatologicosForm>({
+    } = useForm<AntecedentesForm>({
         defaultValues: {
             ...defaultAntecedentes,
-            ...(patient.antecedentes_no_patologicos || {}),
+            ...(patient.antecedentes || {}),
             tipo_sangre:
-                (patient.antecedentes_no_patologicos?.tipo_sangre as TipoSangre) || '',
-        } as AntecedentesNoPatologicosForm,
+                (patient.antecedentes?.tipo_sangre as TipoSangre) || '',
+        } as AntecedentesForm,
     });
 
     const watchOtros = watch('otros') || [];
@@ -54,13 +54,13 @@ export function AntecedentesNoPatologicosTab({
         name: 'otros',
     });
 
-    const onSubmit = (data: AntecedentesNoPatologicosForm) => {
+    const onSubmit = (data: AntecedentesForm) => {
         setIsSaving(true);
         console.log('Enviando datos...', data);
 
         router.put(`/patients/${patient.id}`, {
             ...patient,
-            antecedentes_no_patologicos: data
+            antecedentes: data
         } as any, {
             onSuccess: () => {
                 setIsSaving(false);
@@ -78,7 +78,7 @@ export function AntecedentesNoPatologicosTab({
         >
             <div className="flex items-center justify-between border-b pb-4">
                 <h2 className="text-xl font-semibold">
-                    Antecedentes No Patológicos
+                    Antecedentes
                 </h2>
                 <Button
                     type="submit"

@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { PatientRecordLayout } from './ui/patient-record-layout';
-import { AntecedentesNoPatologicosTab } from './ui/antecedentes-no-patologicos-form';
+import { AntecedentesTab } from './ui/antecedentes-form';
 import { PatientAntecedentesTab } from './schemas/antecedentes-form';
 
 export default function PatientShow({ patient }: { patient: PatientAntecedentesTab }) {
@@ -22,7 +22,7 @@ export default function PatientShow({ patient }: { patient: PatientAntecedentesT
             <Head title={`Expediente: ${patient.first_name}`} />
             
             <PatientRecordLayout patient={patient} currentTab="info">
-                <AntecedentesNoPatologicosTab patient={patient} />
+                <AntecedentesTab patient={patient} />
             </PatientRecordLayout>
         </AppLayout>
     );

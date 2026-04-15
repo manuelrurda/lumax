@@ -2,7 +2,7 @@ import { Patient } from '@/types';
 
 export type TipoSangre = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | '';
 
-export interface AntecedentesNoPatologicosForm {
+export interface AntecedentesForm {
     ocupacion: string;
     religion: string;
     tipo_sangre: TipoSangre;
@@ -15,7 +15,7 @@ export interface AntecedentesNoPatologicosForm {
     otros: { key: string; value: string }[];
 }
 
-export const defaultAntecedentes: AntecedentesNoPatologicosForm = {
+export const defaultAntecedentes: AntecedentesForm = {
     ocupacion: 'Ninguna',
     religion: 'Ninguna',
     tipo_sangre: '',
@@ -29,5 +29,5 @@ export const defaultAntecedentes: AntecedentesNoPatologicosForm = {
 };
 
 export type PatientAntecedentesTab = Patient & {
-    antecedentes_no_patologicos?: AntecedentesNoPatologicosForm | null;
+    antecedentes?: AntecedentesForm | null;
 };

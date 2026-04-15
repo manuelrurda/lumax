@@ -56,7 +56,7 @@ class PatientsController extends Controller
     public function show(Request $request, $id): Response
     {
         $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes_no_patologicos', 'updated_at')
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes', 'updated_at')
             ->findOrFail($id);
 
         return Inertia::render('patients/show', [

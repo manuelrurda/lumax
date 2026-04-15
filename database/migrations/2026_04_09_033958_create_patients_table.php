@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             
             // Datos médicos flexibles
-            $table->jsonb('antecedentes_no_patologicos')->nullable();
+            $table->jsonb('antecedentes')->nullable();
             
             $table->timestamps();
         });

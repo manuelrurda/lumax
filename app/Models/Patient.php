@@ -14,13 +14,13 @@ class Patient extends Model
         'last_name',
         'email',
         'phone',
-        'antecedentes_no_patologicos',
+        'antecedentes',
     ];
 
     protected function casts(): array
     {
         return [
-            'antecedentes_no_patologicos' => 'array',
+            'antecedentes' => 'array',
         ];
     }
 

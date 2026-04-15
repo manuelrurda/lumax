@@ -11,7 +11,7 @@ interface PatientRecordLayoutProps {
 
 export function PatientRecordLayout({ patient, currentTab, children }: PatientRecordLayoutProps) {
     const tabs = [
-        { id: 'info', label: 'Antecedentes no patológicos', href: `/patients/${patient.id}` },
+        { id: 'info', label: 'Antecedentes', href: `/patients/${patient.id}` },
         { id: 'medical-history', label: 'Historial Médico', href: `#` },
         { id: 'consultations', label: 'Consultas', href: `#` },
         { id: 'prescriptions', label: 'Recetas', href: `#` },
