@@ -12,6 +12,7 @@ export interface AntecedentesNoPatologicosForm {
     psicotropicos: string;
     alergias: string;
     perinatales: string;
+    medicamentos_actuales: string;
     otros: { key: string; value: string }[];
 }
 
@@ -58,6 +59,7 @@ export const defaultAntecedentesNoPatologicos: AntecedentesNoPatologicosForm = {
     psicotropicos: 'Ninguno',
     alergias: 'Ninguna',
     perinatales: 'Ninguno',
+    medicamentos_actuales: 'Ninguno',
     otros: [],
 };
 

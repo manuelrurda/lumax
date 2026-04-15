@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
@@ -317,32 +318,46 @@ export function AntecedentesTab({
                         />
                     </div>
 
-                    <div className="space-y-2 md:col-span-2">
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mt-6 pb-4">
+                    <div className="space-y-2">
                         <Label htmlFor="psicotropicos">Psicotrópicos</Label>
-                        <Input
+                        <Textarea
                             id="psicotropicos"
+                            className="resize-none h-24 bg-white"
                             {...register('antecedentes_no_patologicos.psicotropicos')}
                             placeholder="Especifique si aplica"
                         />
                     </div>
 
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="space-y-2">
                         <Label htmlFor="alergias">Alergia a medicamentos</Label>
-                        <Input
+                        <Textarea
                             id="alergias"
+                            className="resize-none h-24 bg-white"
                             {...register('antecedentes_no_patologicos.alergias')}
                             placeholder="Especifique las alergias o 'Ninguna'"
                         />
                     </div>
 
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="perinatales">
-                            Antecedentes Perinatales
-                        </Label>
-                        <Input
+                    <div className="space-y-2">
+                        <Label htmlFor="perinatales">Antecedentes Perinatales</Label>
+                        <Textarea
                             id="perinatales"
+                            className="resize-none h-24 bg-white"
                             {...register('antecedentes_no_patologicos.perinatales')}
                             placeholder="Detalles de antecedentes perinatales"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="medicamentos_actuales">Medicamentos que utiliza actualmente</Label>
+                        <Textarea
+                            id="medicamentos_actuales"
+                            className="resize-none h-24 bg-white"
+                            {...register('antecedentes_no_patologicos.medicamentos_actuales')}
+                            placeholder="Liste los medicamentos o 'Ninguno'"
                         />
                     </div>
                 </div>
