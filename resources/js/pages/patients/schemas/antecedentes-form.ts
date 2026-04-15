@@ -29,10 +29,23 @@ export interface AntecedentesPatologicosForm {
     otros: { key: string; tiempo_evolucion: string }[];
 }
 
+export interface EnfermedadHeredofamiliar {
+    padece: 'sí' | 'no';
+    parentesco: string;
+}
+
+export interface AntecedentesHeredofamiliaresForm {
+    diabetes: EnfermedadHeredofamiliar;
+    hipertension: EnfermedadHeredofamiliar;
+    cancer: EnfermedadHeredofamiliar;
+    glaucoma: EnfermedadHeredofamiliar;
+    otros: { key: string; parentesco: string }[];
+}
+
 export interface AntecedentesForm {
     antecedentes_no_patologicos: AntecedentesNoPatologicosForm;
     antecedentes_patologicos: AntecedentesPatologicosForm;
-    antecedentes_heredofamiliares: Record<string, unknown>;
+    antecedentes_heredofamiliares: AntecedentesHeredofamiliaresForm;
 }
 
 export const defaultAntecedentesNoPatologicos: AntecedentesNoPatologicosForm = {
@@ -57,10 +70,18 @@ export const defaultAntecedentesPatologicos: AntecedentesPatologicosForm = {
     otros: [],
 };
 
+export const defaultAntecedentesHeredofamiliares: AntecedentesHeredofamiliaresForm = {
+    diabetes: { padece: 'no', parentesco: '' },
+    hipertension: { padece: 'no', parentesco: '' },
+    cancer: { padece: 'no', parentesco: '' },
+    glaucoma: { padece: 'no', parentesco: '' },
+    otros: [],
+};
+
 export const defaultAntecedentes: AntecedentesForm = {
     antecedentes_no_patologicos: defaultAntecedentesNoPatologicos,
     antecedentes_patologicos: defaultAntecedentesPatologicos,
-    antecedentes_heredofamiliares: {},
+    antecedentes_heredofamiliares: defaultAntecedentesHeredofamiliares,
 };
 
 export type PatientAntecedentesTab = Patient & {
