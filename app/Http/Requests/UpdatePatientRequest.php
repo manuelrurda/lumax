@@ -19,6 +19,7 @@ class UpdatePatientRequest extends FormRequest
             'phone' => ['nullable', 'string', 'regex:/^[0-9]+$/', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
             'antecedentes' => ['nullable', 'array'],
+            'antecedentes_oftalmologicos' => ['nullable', 'array'],
         ];
     }
 

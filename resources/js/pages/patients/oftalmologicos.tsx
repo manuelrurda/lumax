@@ -1,34 +1,75 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { PatientRecordLayout } from './ui/patient-record-layout';
-import { PatientAntecedentesTab } from './schemas/antecedentes-form';
-import { useForm, Controller } from 'react-hook-form';
-import { AntecedentesOftalmologicosForm, defaultAntecedentesOftalmologicos } from './schemas/antecedentes-oftalmologicos';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Save } from 'lucide-react';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { LoaderCircle, Save } from 'lucide-react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import {
+    AntecedentesOftalmologicosForm,
+    defaultAntecedentesOftalmologicos,
+    PatientOftalmologicosTab,
+} from './schemas/antecedentes-oftalmologicos';
+import { PatientRecordLayout } from './ui/patient-record-layout';
 
-export default function PatientOftalmologicos({ patient }: { patient: PatientAntecedentesTab }) {
+export default function PatientOftalmologicos({
+    patient,
+}: {
+    patient: PatientOftalmologicosTab;
+}) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Pacientes', href: '/patients' },
-        { title: `${patient.first_name} ${patient.last_name}`, href: `/patients/${patient.id}` },
+        {
+            title: `${patient.first_name} ${patient.last_name}`,
+            href: `/patients/${patient.id}`,
+        },
     ];
 
-    const { register, control, handleSubmit, formState: { isDirty } } = useForm<AntecedentesOftalmologicosForm>({
-        defaultValues: defaultAntecedentesOftalmologicos,
+    const [isSaving, setIsSaving] = useState(false);
+
+    const {
+        register,
+        control,
+        handleSubmit,
+        reset,
+        formState: { isDirty },
+    } = useForm<AntecedentesOftalmologicosForm>({
+        defaultValues: {
+            ...defaultAntecedentesOftalmologicos,
+            ...(patient.antecedentes_oftalmologicos || {}),
+        },
     });
 
     const onSubmit = (data: AntecedentesOftalmologicosForm) => {
-        console.log('Mock save:', data);
+        setIsSaving(true);
+        console.log('Enviando datos...', data);
+
+        router.put(
+            `/patients/${patient.id}`,
+            {
+                ...patient,
+                antecedentes_oftalmologicos: data,
+            } as any,
+            {
+                onSuccess: () => {
+                    setIsSaving(false);
+                    reset({}, { keepValues: true });
+                },
+                onError: () => setIsSaving(false),
+                preserveScroll: true,
+            },
+        );
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Antecedentes Oftalmológicos: ${patient.first_name}`} />
-            
+            <Head
+                title={`Antecedentes Oftalmológicos: ${patient.first_name}`}
+            />
+
             <PatientRecordLayout patient={patient} currentTab="oftalmologicos">
                 <form
                     onSubmit={handleSubmit(onSubmit)}
@@ -41,43 +82,59 @@ export default function PatientOftalmologicos({ patient }: { patient: PatientAnt
                         <Button
                             type="submit"
                             className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                            disabled={!isDirty}
+                            disabled={!isDirty || isSaving}
                         >
-                            <Save className="mr-2 h-4 w-4" />
+                            {isSaving ? (
+                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="mr-2 h-4 w-4" />
+                            )}
                             Guardar cambios
                         </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:divide-x divide-border">
+                    <div className="grid grid-cols-1 gap-8 divide-border lg:grid-cols-2 lg:divide-x">
                         {/* Lentes Aéreos */}
                         <div className="space-y-6 lg:pr-4">
-                            <h3 className="text-lg font-medium tracking-tight border-b pb-2">
+                            <h3 className="border-b pb-2 text-lg font-medium tracking-tight">
                                 Lentes aéreos
                             </h3>
-                            
+
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <Label>Última refracción</Label>
-                                    <Input {...register('lentes_aereos.ultima_refraccion')} />
+                                    <Input
+                                        {...register(
+                                            'lentes_aereos.ultima_refraccion',
+                                        )}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Gotas</Label>
-                                    <Input {...register('lentes_aereos.gotas')} />
+                                    <Input
+                                        {...register('lentes_aereos.gotas')}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Cirugías previas</Label>
-                                    <Input {...register('lentes_aereos.cirugias_previas')} />
+                                    <Input
+                                        {...register(
+                                            'lentes_aereos.cirugias_previas',
+                                        )}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Glaucoma</Label>
-                                    <Input {...register('lentes_aereos.glaucoma')} />
+                                    <Input
+                                        {...register('lentes_aereos.glaucoma')}
+                                    />
                                 </div>
                             </div>
                         </div>
 
                         {/* Lentes de Contacto */}
-                        <div className="space-y-6 lg:pl-10 pt-6 lg:pt-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-2">
+                        <div className="space-y-6 pt-6 lg:pt-0 lg:pl-10">
+                            <div className="flex flex-col justify-between gap-4 border-b pb-2 sm:flex-row sm:items-center">
                                 <h3 className="text-lg font-medium tracking-tight">
                                     Lentes de contacto
                                 </h3>
@@ -90,11 +147,16 @@ export default function PatientOftalmologicos({ patient }: { patient: PatientAnt
                                                 <Checkbox
                                                     id="blandos"
                                                     checked={field.value}
-                                                    onCheckedChange={field.onChange}
+                                                    onCheckedChange={
+                                                        field.onChange
+                                                    }
                                                 />
                                             )}
                                         />
-                                        <Label htmlFor="blandos" className="cursor-pointer">
+                                        <Label
+                                            htmlFor="blandos"
+                                            className="cursor-pointer"
+                                        >
                                             Blandos
                                         </Label>
                                     </div>
@@ -106,11 +168,16 @@ export default function PatientOftalmologicos({ patient }: { patient: PatientAnt
                                                 <Checkbox
                                                     id="rigidos"
                                                     checked={field.value}
-                                                    onCheckedChange={field.onChange}
+                                                    onCheckedChange={
+                                                        field.onChange
+                                                    }
                                                 />
                                             )}
                                         />
-                                        <Label htmlFor="rigidos" className="cursor-pointer">
+                                        <Label
+                                            htmlFor="rigidos"
+                                            className="cursor-pointer"
+                                        >
                                             Rígidos
                                         </Label>
                                     </div>
@@ -120,19 +187,31 @@ export default function PatientOftalmologicos({ patient }: { patient: PatientAnt
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <Label>Última refracción</Label>
-                                    <Input {...register('lentes_contacto.ultima_refraccion')} />
+                                    <Input
+                                        {...register(
+                                            'lentes_contacto.ultima_refraccion',
+                                        )}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Trauma ocular</Label>
-                                    <Input {...register('lentes_contacto.trauma_ocular')} />
+                                    <Input
+                                        {...register(
+                                            'lentes_contacto.trauma_ocular',
+                                        )}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Láser</Label>
-                                    <Input {...register('lentes_contacto.laser')} />
+                                    <Input
+                                        {...register('lentes_contacto.laser')}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Otros</Label>
-                                    <Input {...register('lentes_contacto.otros')} />
+                                    <Input
+                                        {...register('lentes_contacto.otros')}
+                                    />
                                 </div>
                             </div>
                         </div>
