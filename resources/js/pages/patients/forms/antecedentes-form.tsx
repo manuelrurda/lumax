@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
+import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
     AntecedentesForm,
@@ -23,32 +24,51 @@ export function AntecedentesTab({
 }) {
     const [isSaving, setIsSaving] = useState(false);
 
+    const draftKey = `patient-${patient.id}-antecedentes`;
+    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const setDraft = useDraftStore((state) => state.setDraft);
+    const clearDraft = useDraftStore((state) => state.clearDraft);
+
+    const initialData = draftState || patient.antecedentes || {};
+
     const {
         register,
         control,
         handleSubmit,
         watch,
         reset,
+        getValues,
         formState: { isDirty },
     } = useForm<AntecedentesForm>({
         defaultValues: {
             antecedentes_no_patologicos: {
                 ...defaultAntecedentesNoPatologicos,
-                ...(patient.antecedentes?.antecedentes_no_patologicos || {}),
+                ...(initialData.antecedentes_no_patologicos || {}),
                 tipo_sangre:
-                    (patient.antecedentes?.antecedentes_no_patologicos
+                    (initialData.antecedentes_no_patologicos
                         ?.tipo_sangre as TipoSangre) || '',
             },
             antecedentes_patologicos: {
                 ...defaultAntecedentesPatologicos,
-                ...(patient.antecedentes?.antecedentes_patologicos || {}),
+                ...(initialData.antecedentes_patologicos || {}),
             },
             antecedentes_heredofamiliares: {
                 ...defaultAntecedentesHeredofamiliares,
-                ...(patient.antecedentes?.antecedentes_heredofamiliares || {}),
+                ...(initialData.antecedentes_heredofamiliares || {}),
             },
         } as AntecedentesForm,
     });
+
+    const isDirtyRef = useRef(isDirty);
+    isDirtyRef.current = isDirty;
+
+    useEffect(() => {
+        return () => {
+            if (isDirtyRef.current) {
+                setDraft(draftKey, getValues());
+            }
+        };
+    }, [draftKey, setDraft, getValues]);
 
     const onSubmit = (data: AntecedentesForm) => {
         setIsSaving(true);
@@ -63,7 +83,8 @@ export function AntecedentesTab({
             {
                 onSuccess: () => {
                     setIsSaving(false);
-                    reset({}, { keepValues: true }); // Reset isDirty state
+                    clearDraft(draftKey);
+                    reset({}, { keepValues: true });
                 },
                 onError: () => setIsSaving(false),
                 preserveScroll: true,
@@ -81,7 +102,7 @@ export function AntecedentesTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty || isSaving}
+                    disabled={(!isDirty && !draftState) || isSaving}
                 >
                     {isSaving ? (
                         <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />

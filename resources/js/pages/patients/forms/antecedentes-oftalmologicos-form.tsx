@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useDraftStore } from '@/hooks/use-draft-store';
 import {
     AntecedentesOftalmologicosForm,
     defaultAntecedentesOftalmologicos,
@@ -19,18 +20,37 @@ export function AntecedentesOftalmologicosFormTab({
 }) {
     const [isSaving, setIsSaving] = useState(false);
 
+    const draftKey = `patient-${patient.id}-oftalmologicos`;
+    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const setDraft = useDraftStore((state) => state.setDraft);
+    const clearDraft = useDraftStore((state) => state.clearDraft);
+
+    const initialData = draftState || patient.antecedentes_oftalmologicos || {};
+
     const {
         register,
         control,
         handleSubmit,
         reset,
+        getValues,
         formState: { isDirty },
     } = useForm<AntecedentesOftalmologicosForm>({
         defaultValues: {
             ...defaultAntecedentesOftalmologicos,
-            ...(patient.antecedentes_oftalmologicos || {}),
+            ...(initialData || {}),
         },
     });
+
+    const isDirtyRef = useRef(isDirty);
+    isDirtyRef.current = isDirty;
+
+    useEffect(() => {
+        return () => {
+            if (isDirtyRef.current) {
+                setDraft(draftKey, getValues());
+            }
+        };
+    }, [draftKey, setDraft, getValues]);
 
     const onSubmit = (data: AntecedentesOftalmologicosForm) => {
         setIsSaving(true);
@@ -45,6 +65,7 @@ export function AntecedentesOftalmologicosFormTab({
             {
                 onSuccess: () => {
                     setIsSaving(false);
+                    clearDraft(draftKey);
                     reset({}, { keepValues: true });
                 },
                 onError: () => setIsSaving(false),
@@ -65,7 +86,7 @@ export function AntecedentesOftalmologicosFormTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty || isSaving}
+                    disabled={(!isDirty && !draftState) || isSaving}
                 >
                     {isSaving ? (
                         <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
