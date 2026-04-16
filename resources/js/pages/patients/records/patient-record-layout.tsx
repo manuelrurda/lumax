@@ -21,7 +21,11 @@ export function PatientRecordLayout({
             label: 'Antecedentes Oftalmológicos',
             href: `/patients/${patient.id}/oftalmologicos`,
         },
-        { id: 'medical-history', label: 'Historial Médico', href: `#` },
+        {
+            id: 'exploracion-fisica',
+            label: 'Exploración Física',
+            href: `/patients/${patient.id}/exploracion-fisica`,
+        },
         { id: 'consultations', label: 'Consultas', href: `#` },
         { id: 'prescriptions', label: 'Recetas', href: `#` },
         { id: 'files', label: 'Archivos', href: `#` },
