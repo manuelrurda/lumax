@@ -2,10 +2,10 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { AntecedentesTab } from './forms/antecedentes-form';
+import { PatientRecordLayout } from './patient-record-layout';
 import { PatientAntecedentesTab } from './schemas/antecedentes';
-import { PatientRecordLayout } from './ui/patient-record-layout';
 
-export default function PatientShow({
+export default function PatientAntecedentes({
     patient,
 }: {
     patient: PatientAntecedentesTab;

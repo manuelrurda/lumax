@@ -1,7 +1,7 @@
 import { Patient } from '@/types';
 import { Link } from '@inertiajs/react';
 import React from 'react';
-import { EditPatientDialog } from './edit-patient-dialog';
+import { EditPatientDialog } from '../ui/edit-patient-dialog';
 
 interface PatientRecordLayoutProps {
     patient: Patient;
@@ -9,10 +9,18 @@ interface PatientRecordLayoutProps {
     children: React.ReactNode;
 }
 
-export function PatientRecordLayout({ patient, currentTab, children }: PatientRecordLayoutProps) {
+export function PatientRecordLayout({
+    patient,
+    currentTab,
+    children,
+}: PatientRecordLayoutProps) {
     const tabs = [
         { id: 'info', label: 'Antecedentes', href: `/patients/${patient.id}` },
-        { id: 'oftalmologicos', label: 'Antecedentes Oftalmológicos', href: `/patients/${patient.id}/oftalmologicos` },
+        {
+            id: 'oftalmologicos',
+            label: 'Antecedentes Oftalmológicos',
+            href: `/patients/${patient.id}/oftalmologicos`,
+        },
         { id: 'medical-history', label: 'Historial Médico', href: `#` },
         { id: 'consultations', label: 'Consultas', href: `#` },
         { id: 'prescriptions', label: 'Recetas', href: `#` },
@@ -24,18 +32,22 @@ export function PatientRecordLayout({ patient, currentTab, children }: PatientRe
             <div className="px-6 py-6 pb-0">
                 <div className="flex items-start gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+                        <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-foreground">
                             {patient.first_name} {patient.last_name}
                             <EditPatientDialog patient={patient} />
                         </h1>
                         <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>Teléfono: {patient.phone || 'No registrado'}</span>
+                            <span>
+                                Teléfono: {patient.phone || 'No registrado'}
+                            </span>
                             <span>|</span>
-                            <span>Correo: {patient.email || 'No registrado'}</span>
+                            <span>
+                                Correo: {patient.email || 'No registrado'}
+                            </span>
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="mt-8 flex gap-8 border-b">
                     {tabs.map((tab) => {
                         const isActive = currentTab === tab.id;
@@ -56,9 +68,7 @@ export function PatientRecordLayout({ patient, currentTab, children }: PatientRe
                 </div>
             </div>
 
-            <div className="flex-1 p-6">
-                {children}
-            </div>
+            <div className="flex-1 p-6">{children}</div>
         </div>
     );
 }

@@ -2,11 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useDraftStore } from '@/hooks/use-draft-store';
 import {
     AntecedentesOftalmologicosForm,
     defaultAntecedentesOftalmologicos,
@@ -108,30 +108,22 @@ export function AntecedentesOftalmologicosFormTab({
                         <div className="space-y-2">
                             <Label>Última refracción</Label>
                             <Input
-                                {...register(
-                                    'lentes_aereos.ultima_refraccion',
-                                )}
+                                {...register('lentes_aereos.ultima_refraccion')}
                             />
                         </div>
                         <div className="space-y-2">
                             <Label>Gotas</Label>
-                            <Input
-                                {...register('lentes_aereos.gotas')}
-                            />
+                            <Input {...register('lentes_aereos.gotas')} />
                         </div>
                         <div className="space-y-2">
                             <Label>Cirugías previas</Label>
                             <Input
-                                {...register(
-                                    'lentes_aereos.cirugias_previas',
-                                )}
+                                {...register('lentes_aereos.cirugias_previas')}
                             />
                         </div>
                         <div className="space-y-2">
                             <Label>Glaucoma</Label>
-                            <Input
-                                {...register('lentes_aereos.glaucoma')}
-                            />
+                            <Input {...register('lentes_aereos.glaucoma')} />
                         </div>
                     </div>
                 </div>
@@ -151,9 +143,7 @@ export function AntecedentesOftalmologicosFormTab({
                                         <Checkbox
                                             id="blandos"
                                             checked={field.value}
-                                            onCheckedChange={
-                                                field.onChange
-                                            }
+                                            onCheckedChange={field.onChange}
                                         />
                                     )}
                                 />
@@ -172,9 +162,7 @@ export function AntecedentesOftalmologicosFormTab({
                                         <Checkbox
                                             id="rigidos"
                                             checked={field.value}
-                                            onCheckedChange={
-                                                field.onChange
-                                            }
+                                            onCheckedChange={field.onChange}
                                         />
                                     )}
                                 />
@@ -200,22 +188,16 @@ export function AntecedentesOftalmologicosFormTab({
                         <div className="space-y-2">
                             <Label>Trauma ocular</Label>
                             <Input
-                                {...register(
-                                    'lentes_contacto.trauma_ocular',
-                                )}
+                                {...register('lentes_contacto.trauma_ocular')}
                             />
                         </div>
                         <div className="space-y-2">
                             <Label>Láser</Label>
-                            <Input
-                                {...register('lentes_contacto.laser')}
-                            />
+                            <Input {...register('lentes_contacto.laser')} />
                         </div>
                         <div className="space-y-2">
                             <Label>Otros</Label>
-                            <Input
-                                {...register('lentes_contacto.otros')}
-                            />
+                            <Input {...register('lentes_contacto.otros')} />
                         </div>
                     </div>
                 </div>

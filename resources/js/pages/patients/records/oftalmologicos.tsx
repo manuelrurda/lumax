@@ -1,9 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { PatientRecordLayout } from './ui/patient-record-layout';
-import { PatientOftalmologicosTab } from './schemas/antecedentes-oftalmologicos';
 import { AntecedentesOftalmologicosFormTab } from './forms/antecedentes-oftalmologicos-form';
+import { PatientRecordLayout } from './patient-record-layout';
+import { PatientOftalmologicosTab } from './schemas/antecedentes-oftalmologicos';
 
 export default function PatientOftalmologicos({
     patient,

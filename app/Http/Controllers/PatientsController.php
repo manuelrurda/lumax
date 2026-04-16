@@ -53,13 +53,13 @@ class PatientsController extends Controller
     /**
      * Display the specified patient.
      */
-    public function show(Request $request, $id): Response
+    public function antecedentes(Request $request, $id): Response
     {
         $patient = Patient::where('user_id', $request->user()->id)
             ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes', 'updated_at')
             ->findOrFail($id);
 
-        return Inertia::render('patients/show', [
+        return Inertia::render('patients/records/antecedentes', [
             'patient' => $patient,
         ]);
     }
@@ -73,7 +73,7 @@ class PatientsController extends Controller
             ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes_oftalmologicos', 'updated_at')
             ->findOrFail($id);
 
-        return Inertia::render('patients/oftalmologicos', [
+        return Inertia::render('patients/records/oftalmologicos', [
             'patient' => $patient,
         ]);
     }
