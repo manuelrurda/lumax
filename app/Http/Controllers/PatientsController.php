@@ -93,6 +93,20 @@ class PatientsController extends Controller
     }
 
     /**
+     * Display the specified patient estrabograma tab.
+     */
+    public function estrabograma(Request $request, $id): Response
+    {
+        $patient = Patient::where('user_id', $request->user()->id)
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
+            ->findOrFail($id);
+
+        return Inertia::render('patients/records/estrabograma', [
+            'patient' => $patient,
+        ]);
+    }
+
+    /**
      * Store a newly created patient in storage.
      */
     public function store(StorePatientRequest $request): RedirectResponse

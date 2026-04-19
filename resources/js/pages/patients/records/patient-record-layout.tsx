@@ -27,7 +27,11 @@ export function PatientRecordLayout({
             href: `/patients/${patient.id}/exploracion-fisica`,
         },
         { id: 'consultations', label: 'Consultas', href: `#` },
-        { id: 'prescriptions', label: 'Recetas', href: `#` },
+        {
+            id: 'estrabograma',
+            label: 'Estrabograma',
+            href: `/patients/${patient.id}/estrabograma`,
+        },
         { id: 'files', label: 'Archivos', href: `#` },
     ];
 

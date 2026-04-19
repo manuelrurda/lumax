@@ -11,5 +11,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patients/{patient}', [PatientsController::class, 'antecedentes'])->name('patients.antecedentes');
     Route::get('/patients/{patient}/oftalmologicos', [PatientsController::class, 'oftalmologicos'])->name('patients.oftalmologicos');
     Route::get('/patients/{patient}/exploracion-fisica', [PatientsController::class, 'exploracionFisica'])->name('patients.exploracion-fisica');
+    Route::get('/patients/{patient}/estrabograma', [PatientsController::class, 'estrabograma'])->name('patients.estrabograma');
 });
 
