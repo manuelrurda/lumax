@@ -2,9 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { UseFormRegister, useForm } from 'react-hook-form';
 import {
     defaultExploracionOftalmologica,
@@ -125,17 +126,36 @@ export function ExploracionOftalmologicaFormTab({
 }) {
     const [isSaving, setIsSaving] = useState(false);
 
+    const draftKey = `patient-${patient.id}-exploracion-oftalmologica`;
+    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const setDraft = useDraftStore((state) => state.setDraft);
+    const clearDraft = useDraftStore((state) => state.clearDraft);
+
+    const initialData = draftState || patient.exploracion_oftalmologica || {};
+
     const {
         register,
         handleSubmit,
         reset,
+        getValues,
         formState: { isDirty },
     } = useForm<ExploracionOftalmologicaForm>({
         defaultValues: {
             ...defaultExploracionOftalmologica,
-            ...(patient.exploracion_oftalmologica || {}),
+            ...(initialData || {}),
         },
     });
+
+    const isDirtyRef = useRef(isDirty);
+    isDirtyRef.current = isDirty;
+
+    useEffect(() => {
+        return () => {
+            if (isDirtyRef.current) {
+                setDraft(draftKey, getValues());
+            }
+        };
+    }, [draftKey, setDraft, getValues]);
 
     const onSubmit = (data: ExploracionOftalmologicaForm) => {
         setIsSaving(true);
@@ -148,6 +168,7 @@ export function ExploracionOftalmologicaFormTab({
             {
                 onSuccess: () => {
                     setIsSaving(false);
+                    clearDraft(draftKey);
                     // Update default values to new ones, thus clearing isDirty
                     reset({}, { keepValues: true });
                 },
@@ -171,7 +192,7 @@ export function ExploracionOftalmologicaFormTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty || isSaving}
+                    disabled={(!isDirty && !draftState) || isSaving}
                 >
                     {isSaving ? (
                         <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
