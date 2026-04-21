@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { UsersRound } from 'lucide-react';
+import { CalendarDays, UsersRound } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavUser } from './nav-user';
 
@@ -19,6 +19,11 @@ const mainNavItems: NavItem[] = [
         title: 'Pacientes',
         href: '/patients',
         icon: UsersRound,
+    },
+    {
+        title: 'Citas',
+        href: '/appointments',
+        icon: CalendarDays,
     },
 ];
 
