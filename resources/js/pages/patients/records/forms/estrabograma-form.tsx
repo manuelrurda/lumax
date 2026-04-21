@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
@@ -13,8 +14,7 @@ import {
 
 // Shared style for all diagram input lines
 const lineInput =
-    'absolute border-1 border-foreground bg-white text-center' +
-    'focus:border-foreground focus:ring-0 px-1 leading-none text-sm';
+    'absolute text-center bg-white focus:border-foreground focus:ring-0 px-1 text-sm h-7';
 
 export function EstrabogramaFormTab({
     patient,
@@ -114,150 +114,150 @@ export function EstrabogramaFormTab({
 
                     {/* ── Inputs overlaid on SVG coordinate space ── */}
                     {/* Top-left box */}
-                    <input
+                    <Input
                         {...register('campo_1')}
                         className={lineInput}
                         style={{ top: 40, left: 235, width: 70 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_2')}
                         className={lineInput}
                         style={{ top: 130, left: 35, width: 70 }}
                     />
 
                     {/* Top-right box */}
-                    <input
+                    <Input
                         {...register('campo_3')}
                         className={lineInput}
                         style={{ top: 40, left: 411, width: 70 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_4')}
                         className={lineInput}
                         style={{ top: 130, left: 613, width: 70 }}
                     />
 
                     {/* Three inputs on top of left triangle */}
-                    <input
+                    <Input
                         {...register('campo_5')}
                         className={lineInput}
                         style={{ top: 170, left: 160, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_6')}
                         className={lineInput}
                         style={{ top: 170, left: 220, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_7')}
                         className={lineInput}
                         style={{ top: 170, left: 280, width: 52 }}
                     />
 
                     {/* Three inputs on top of right triangle */}
-                    <input
+                    <Input
                         {...register('campo_8')}
                         className={lineInput}
                         style={{ top: 170, left: 385, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_9')}
                         className={lineInput}
                         style={{ top: 170, left: 445, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_10')}
                         className={lineInput}
                         style={{ top: 170, left: 505, width: 52 }}
                     />
 
                     {/* Three inputs on the middle of left triangle */}
-                    <input
+                    <Input
                         {...register('campo_11')}
                         className={lineInput}
                         style={{ top: 290, left: 90, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_12')}
                         className={lineInput}
                         style={{ top: 290, left: 190, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_13')}
                         className={lineInput}
                         style={{ top: 290, left: 280, width: 52 }}
                     />
 
                     {/* Three inputs on the middle of right triangle */}
-                    <input
+                    <Input
                         {...register('campo_14')}
                         className={lineInput}
                         style={{ top: 290, left: 385, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_15')}
                         className={lineInput}
                         style={{ top: 290, left: 475, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_16')}
                         className={lineInput}
                         style={{ top: 290, left: 575, width: 52 }}
                     />
 
                     {/* Three inputs on the bottom of left triangle */}
-                    <input
+                    <Input
                         {...register('campo_17')}
                         className={lineInput}
                         style={{ top: 400, left: 160, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_18')}
                         className={lineInput}
                         style={{ top: 400, left: 220, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_19')}
                         className={lineInput}
                         style={{ top: 400, left: 280, width: 52 }}
                     />
 
                     {/* Three inputs on the bottom of right triangle */}
-                    <input
+                    <Input
                         {...register('campo_20')}
                         className={lineInput}
                         style={{ top: 400, left: 385, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_21')}
                         className={lineInput}
                         style={{ top: 400, left: 445, width: 52 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_22')}
                         className={lineInput}
                         style={{ top: 400, left: 505, width: 52 }}
                     />
 
                     {/* Two wide inputs between triangles */}
-                    <input
+                    <Input
                         {...register('campo_23')}
                         className={lineInput}
                         style={{ top: 240, left: 285, width: 150 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_24')}
                         className={lineInput}
                         style={{ top: 340, left: 285, width: 150 }}
                     />
 
                     {/* Two wide inputs outside the triangles */}
-                    <input
+                    <Input
                         {...register('campo_25')}
                         className={lineInput}
                         style={{ top: 340, width: 150 }}
                     />
-                    <input
+                    <Input
                         {...register('campo_26')}
                         className={lineInput}
                         style={{ top: 340, left: 570, width: 150 }}
