@@ -61,8 +61,8 @@ class PatientsController extends Controller
         if ($request->filled('q')) {
             $search = strtolower($request->q);
             $query->where(function ($q) use ($search) {
-                $q->where(\Illuminate\Support\Facades\DB::raw('LOWER(first_name)'), 'LIKE', "%{$search}%")
-                  ->orWhere(\Illuminate\Support\Facades\DB::raw('LOWER(last_name)'), 'LIKE', "%{$search}%");
+                $q->where(DB::raw('LOWER(first_name)'), 'LIKE', "%{$search}%")
+                  ->orWhere(DB::raw('LOWER(last_name)'), 'LIKE', "%{$search}%");
             });
         }
 

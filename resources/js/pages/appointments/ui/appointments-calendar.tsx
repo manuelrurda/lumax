@@ -1,6 +1,7 @@
+import { router } from '@inertiajs/react';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, dateFnsLocalizer, Event } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -21,52 +22,68 @@ const localizer = dateFnsLocalizer({
 
 const DnDCalendar = withDragAndDrop(Calendar);
 
-interface MockEvent extends Event {
+interface BackendEvent extends Event {
     id: number;
     patientId: number;
     notes?: string;
 }
 
-const mockEvents: MockEvent[] = [
-    {
-        id: 1,
-        patientId: 1,
-        title: 'Juan Pérez - Revisión',
-        start: new Date(new Date().setHours(10, 0, 0, 0)),
-        end: new Date(new Date().setHours(11, 0, 0, 0)),
-        notes: 'Traer estudios anteriores',
-    },
-    {
-        id: 2,
-        patientId: 2,
-        title: 'María García - Cirugía',
-        start: new Date(new Date().setHours(14, 0, 0, 0)),
-        end: new Date(new Date().setHours(16, 0, 0, 0)),
-        notes: 'Ayuno de 8 horas',
-    },
-];
-
 export function AppointmentsCalendar() {
-    const [events, setEvents] = useState<MockEvent[]>(mockEvents);
+    const [events, setEvents] = useState<BackendEvent[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogData, setDialogData] = useState<Partial<AppointmentFormData> | null>(null);
 
+    const fetchEvents = async (range?: Date[] | { start: Date; end: Date }) => {
+        try {
+            // Can pass ?start=...&end=... if we map range
+            const res = await fetch('/appointments', {
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+            const data = await res.json();
+            setEvents(
+                data.map((e: any) => ({
+                    id: e.id,
+                    patientId: e.patient_id,
+                    title: e.title,
+                    notes: e.notes,
+                    start: new Date(e.starts_at),
+                    end: new Date(e.ends_at),
+                })),
+            );
+        } catch (error) {
+            console.error('Failed to fetch events', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
     const onEventResize = (data: any) => {
         const { event, start, end } = data;
-        setEvents((events) => events.map((existingEvent) => {
-            return existingEvent.id === event.id
-                ? { ...existingEvent, start: new Date(start), end: new Date(end) }
-                : existingEvent;
-        }));
+        router.put(
+            `/appointments/${event.id}`,
+            {
+                starts_at: start.toISOString(),
+                ends_at: end.toISOString()
+            },
+            { onSuccess: () => fetchEvents() }
+        );
     };
 
     const onEventDrop = (data: any) => {
         const { event, start, end } = data;
-        setEvents((events) => events.map((existingEvent) => {
-            return existingEvent.id === event.id
-                ? { ...existingEvent, start: new Date(start), end: new Date(end) }
-                : existingEvent;
-        }));
+        router.put(
+            `/appointments/${event.id}`,
+            {
+                starts_at: start.toISOString(),
+                ends_at: end.toISOString()
+            },
+            { onSuccess: () => fetchEvents() }
+        );
     };
 
     const handleSelectSlot = ({ start, end }: { start: Date; end: Date }) => {
@@ -75,7 +92,7 @@ export function AppointmentsCalendar() {
     };
 
     const handleSelectEvent = (e: any) => {
-        const event = e as MockEvent;
+        const event = e as BackendEvent;
         setDialogData({
             id: event.id,
             patientId: event.patientId,
@@ -88,15 +105,38 @@ export function AppointmentsCalendar() {
     };
 
     const handleSaveEvent = (data: AppointmentFormData) => {
+        const payload = {
+            patient_id: data.patientId,
+            title: data.title,
+            notes: data.notes,
+            starts_at: data.start.toISOString(),
+            ends_at: data.end.toISOString(),
+        };
+
         if (data.id) {
-            setEvents((events) => events.map((e) => (e.id === data.id ? { ...e, ...data } : e)));
+            router.put(`/appointments/${data.id}`, payload, {
+                onSuccess: () => {
+                    setDialogOpen(false);
+                    fetchEvents();
+                },
+            });
         } else {
-            setEvents((events) => [...events, { ...data, id: Math.random() }]);
+            router.post('/appointments', payload, {
+                onSuccess: () => {
+                    setDialogOpen(false);
+                    fetchEvents();
+                },
+            });
         }
     };
 
     const handleDeleteEvent = (id: number) => {
-        setEvents((events) => events.filter((e) => e.id !== id));
+        router.delete(`/appointments/${id}`, {
+            onSuccess: () => {
+                setDialogOpen(false);
+                fetchEvents();
+            },
+        });
     };
 
     return (
