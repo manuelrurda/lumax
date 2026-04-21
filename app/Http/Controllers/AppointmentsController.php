@@ -2,12 +2,83 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class AppointmentsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('appointments/index');
+        // For the Inertia page load:
+        if (!$request->wantsJson()) {
+            // Retrieve patients so we can pick them in the UI when creating an appointment
+            $patients = $request->user()->patients()->orderBy('first_name')->get(['id', 'first_name', 'last_name']);
+            return Inertia::render('appointments/index', [
+                'patients' => $patients
+            ]);
+        }
+
+        // For the calendar data fetching (JSON):
+        // Expecting start and end dates from the calendar view
+        $start = $request->query('start');
+        $end = $request->query('end');
+
+        $query = $request->user()->appointments()->with('patient:id,first_name,last_name');
+
+        if ($start) {
+            $query->where('starts_at', '>=', Carbon::parse($start));
+        }
+        if ($end) {
+            $query->where('ends_at', '<=', Carbon::parse($end));
+        }
+
+        return response()->json($query->get());
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'title' => 'required|string|max:255',
+            'notes' => 'nullable|string',
+            'starts_at' => 'required|date',
+            'ends_at' => 'required|date|after:starts_at',
+        ]);
+
+        $appointment = $request->user()->appointments()->create($validated);
+
+        return redirect()->back()->with('success', 'Cita creada exitosamente.');
+    }
+
+    public function update(Request $request, Appointment $appointment)
+    {
+        if ($appointment->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'patient_id' => 'sometimes|exists:patients,id',
+            'title' => 'sometimes|string|max:255',
+            'notes' => 'nullable|string',
+            'starts_at' => 'sometimes|date',
+            'ends_at' => 'sometimes|date|after:starts_at',
+        ]);
+
+        $appointment->update($validated);
+
+        return redirect()->back()->with('success', 'Cita actualizada exitosamente.');
+    }
+
+    public function destroy(Request $request, Appointment $appointment)
+    {
+        if ($appointment->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $appointment->delete();
+
+        return redirect()->back()->with('success', 'Cita eliminada exitosamente.');
     }
 }
