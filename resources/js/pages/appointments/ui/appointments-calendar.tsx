@@ -5,6 +5,7 @@ import { Calendar, dateFnsLocalizer, Event } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { AppointmentDialog, type AppointmentFormData } from './appointment-dialog';
 
 const locales = {
     'es': es,
@@ -47,46 +48,55 @@ const mockEvents: MockEvent[] = [
 
 export function AppointmentsCalendar() {
     const [events, setEvents] = useState<MockEvent[]>(mockEvents);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogData, setDialogData] = useState<Partial<AppointmentFormData> | null>(null);
 
     const onEventResize = (data: any) => {
         const { event, start, end } = data;
-        const nextEvents = events.map((existingEvent) => {
+        setEvents((events) => events.map((existingEvent) => {
             return existingEvent.id === event.id
                 ? { ...existingEvent, start: new Date(start), end: new Date(end) }
                 : existingEvent;
-        });
-        setEvents(nextEvents);
+        }));
     };
 
     const onEventDrop = (data: any) => {
         const { event, start, end } = data;
-        const nextEvents = events.map((existingEvent) => {
+        setEvents((events) => events.map((existingEvent) => {
             return existingEvent.id === event.id
                 ? { ...existingEvent, start: new Date(start), end: new Date(end) }
                 : existingEvent;
-        });
-        setEvents(nextEvents);
+        }));
     };
 
     const handleSelectSlot = ({ start, end }: { start: Date; end: Date }) => {
-        const title = window.prompt('New Event name');
-        if (title) {
-            setEvents([
-                ...events,
-                {
-                    start,
-                    end,
-                    title,
-                    id: Math.random(),
-                    patientId: 0,
-                },
-            ]);
-        }
+        setDialogData({ start, end, title: '', notes: '' });
+        setDialogOpen(true);
     };
 
     const handleSelectEvent = (e: any) => {
         const event = e as MockEvent;
-        window.alert(`Event: ${event.title}\nNotes: ${event.notes}`);
+        setDialogData({
+            id: event.id,
+            patientId: event.patientId,
+            title: event.title as string,
+            start: event.start as Date,
+            end: event.end as Date,
+            notes: event.notes,
+        });
+        setDialogOpen(true);
+    };
+
+    const handleSaveEvent = (data: AppointmentFormData) => {
+        if (data.id) {
+            setEvents((events) => events.map((e) => (e.id === data.id ? { ...e, ...data } : e)));
+        } else {
+            setEvents((events) => [...events, { ...data, id: Math.random() }]);
+        }
+    };
+
+    const handleDeleteEvent = (id: number) => {
+        setEvents((events) => events.filter((e) => e.id !== id));
     };
 
     return (
@@ -119,6 +129,14 @@ export function AppointmentsCalendar() {
                 timeslots={2}
                 min={new Date(0, 0, 0, 6, 0, 0)} // Start at 6 AM
                 max={new Date(0, 0, 0, 22, 0, 0)} // End at 10 PM
+            />
+
+            <AppointmentDialog
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                initialData={dialogData}
+                onSave={handleSaveEvent}
+                onDelete={handleDeleteEvent}
             />
         </div>
     );

@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { AppointmentsCalendar } from './components/appointments-calendar';
+import { AppointmentsCalendar } from './ui/appointments-calendar';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
