@@ -16,6 +16,7 @@ class Patient extends Model
         'phone',
         'antecedentes',
         'antecedentes_oftalmologicos',
+        'exploracion_fisica',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class Patient extends Model
         return [
             'antecedentes' => 'array',
             'antecedentes_oftalmologicos' => 'array',
+            'exploracion_fisica' => 'array',
         ];
     }
 

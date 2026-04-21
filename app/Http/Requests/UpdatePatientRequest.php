@@ -20,6 +20,7 @@ class UpdatePatientRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'antecedentes' => ['nullable', 'array'],
             'antecedentes_oftalmologicos' => ['nullable', 'array'],
+            'exploracion_fisica' => ['nullable', 'array'],
         ];
     }
 

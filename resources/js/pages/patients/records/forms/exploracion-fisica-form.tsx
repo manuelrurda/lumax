@@ -2,7 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { LoaderCircle, Save } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
     defaultExploracionFisica,
@@ -15,9 +17,12 @@ export function ExploracionFisicaFormTab({
 }: {
     patient: PatientExploracionFisicaTab;
 }) {
+    const [isSaving, setIsSaving] = useState(false);
+
     const {
         register,
         handleSubmit,
+        reset,
         formState: { isDirty },
     } = useForm<ExploracionFisicaForm>({
         defaultValues: {
@@ -27,7 +32,23 @@ export function ExploracionFisicaFormTab({
     });
 
     const onSubmit = (data: ExploracionFisicaForm) => {
-        console.log('Form UI Only Submit:', data);
+        setIsSaving(true);
+        router.put(
+            `/patients/${patient.id}`,
+            {
+                ...patient,
+                exploracion_fisica: data,
+            } as any,
+            {
+                onSuccess: () => {
+                    setIsSaving(false);
+                    // Update default values to new ones, thus clearing isDirty
+                    reset({}, { keepValues: true });
+                },
+                onError: () => setIsSaving(false),
+                preserveScroll: true,
+            },
+        );
     };
 
     return (
@@ -40,27 +61,44 @@ export function ExploracionFisicaFormTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty}
+                    disabled={!isDirty || isSaving}
                 >
-                    <Save className="mr-2 h-4 w-4" />
+                    {isSaving ? (
+                        <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Save className="mr-2 h-4 w-4" />
+                    )}
                     Guardar cambios
                 </Button>
             </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="space-y-2">
-                    <Label htmlFor="frecuencia_cardiaca">Frecuencia cardíaca</Label>
-                    <Input id="frecuencia_cardiaca" {...register('frecuencia_cardiaca')} />
+                    <Label htmlFor="frecuencia_cardiaca">
+                        Frecuencia cardíaca
+                    </Label>
+                    <Input
+                        id="frecuencia_cardiaca"
+                        {...register('frecuencia_cardiaca')}
+                    />
                 </div>
-                
+
                 <div className="space-y-2">
-                    <Label htmlFor="frecuencia_respiratoria">Frecuencia respiratoria</Label>
-                    <Input id="frecuencia_respiratoria" {...register('frecuencia_respiratoria')} />
+                    <Label htmlFor="frecuencia_respiratoria">
+                        Frecuencia respiratoria
+                    </Label>
+                    <Input
+                        id="frecuencia_respiratoria"
+                        {...register('frecuencia_respiratoria')}
+                    />
                 </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="presion_arterial">Presión arterial</Label>
-                    <Input id="presion_arterial" {...register('presion_arterial')} />
+                    <Input
+                        id="presion_arterial"
+                        {...register('presion_arterial')}
+                    />
                 </div>
 
                 <div className="space-y-2">
@@ -70,11 +108,13 @@ export function ExploracionFisicaFormTab({
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="padecimiento_actual">Padecimiento actual / Notas clínicas</Label>
-                <Textarea 
-                    id="padecimiento_actual" 
+                <Label htmlFor="padecimiento_actual">
+                    Padecimiento actual / Notas clínicas
+                </Label>
+                <Textarea
+                    id="padecimiento_actual"
                     className="min-h-[150px]"
-                    {...register('padecimiento_actual')} 
+                    {...register('padecimiento_actual')}
                 />
             </div>
         </form>
