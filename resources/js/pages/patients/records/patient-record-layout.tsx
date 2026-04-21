@@ -36,7 +36,11 @@ export function PatientRecordLayout({
             label: 'Estrabograma',
             href: `/patients/${patient.id}/estrabograma`,
         },
-        { id: 'files', label: 'Archivos', href: `#` },
+        {
+            id: 'angulo-iridocorneal',
+            label: 'Ángulo Iridocorneal',
+            href: `/patients/${patient.id}/angulo-iridocorneal`,
+        },
     ];
 
     return (

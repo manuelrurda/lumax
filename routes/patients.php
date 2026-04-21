@@ -13,5 +13,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patients/{patient}/exploracion-fisica', [PatientsController::class, 'exploracionFisica'])->name('patients.exploracion-fisica');
     Route::get('/patients/{patient}/estrabograma', [PatientsController::class, 'estrabograma'])->name('patients.estrabograma');
     Route::get('/patients/{patient}/exploracion-oftalmologica', [PatientsController::class, 'exploracionOftalmologica'])->name('patients.exploracion-oftalmologica');
+    Route::get('/patients/{patient}/angulo-iridocorneal', [PatientsController::class, 'anguloIridocorneal'])->name('patients.angulo-iridocorneal');
 });
 
