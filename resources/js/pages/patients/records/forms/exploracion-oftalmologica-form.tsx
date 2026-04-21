@@ -1,11 +1,120 @@
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Save } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormRegister } from 'react-hook-form';
 import {
     defaultExploracionOftalmologica,
     ExploracionOftalmologicaForm,
     PatientExploracionOftalmologicaTab,
 } from '../schemas/exploracion-oftalmologica';
+
+function MeasurementsGroup({
+    title,
+    prefix,
+    register,
+}: {
+    title: string;
+    prefix: 'od_sin' | 'od_con' | 'oi_sin' | 'oi_con';
+    register: UseFormRegister<ExploracionOftalmologicaForm>;
+}) {
+    // Reusable small borderless inputs like underscores
+    const blankInput = 'w-16 h-7 px-1 text-center';
+
+    return (
+        <div className="mb-6 space-y-3">
+            <h4 className="text-sm font-semibold">{title}</h4>
+
+            <div className="flex items-center space-x-2 text-sm">
+                <span className="w-28 font-medium">Queratometrias</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_quera_1`)}
+                />
+                <span className="text-muted-foreground">=</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_quera_2`)}
+                />
+                <span className="text-muted-foreground">x</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_quera_3`)}
+                />
+            </div>
+
+            <div className="flex items-center space-x-2 text-sm">
+                <span className="w-28 font-medium">Retinoscopía</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_retino_1`)}
+                />
+                <span className="text-muted-foreground">=</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_retino_2`)}
+                />
+                <span className="text-muted-foreground">x</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_retino_3`)}
+                />
+                <span className="text-muted-foreground">CV</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_retino_4`)}
+                />
+            </div>
+
+            <div className="flex items-center space-x-2 text-sm">
+                <span className="w-28 font-medium">Refracción</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_refrac_1`)}
+                />
+                <span className="text-muted-foreground">=</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_refrac_2`)}
+                />
+                <span className="text-muted-foreground">x</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_refrac_3`)}
+                />
+                <span className="text-muted-foreground">CV</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_refrac_4`)}
+                />
+            </div>
+
+            <div className="flex items-center space-x-2 text-sm">
+                <span className="w-28 font-medium">Cicloplejia</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_ciclo_1`)}
+                />
+                <span className="text-muted-foreground">=</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_ciclo_2`)}
+                />
+                <span className="text-muted-foreground">x</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_ciclo_3`)}
+                />
+                <span className="text-muted-foreground">CV</span>
+                <Input
+                    className={blankInput}
+                    {...register(`${prefix}_ciclo_4`)}
+                />
+            </div>
+        </div>
+    );
+}
 
 export function ExploracionOftalmologicaFormTab({
     patient,
@@ -27,6 +136,8 @@ export function ExploracionOftalmologicaFormTab({
         console.log('Exploración Oftalmológica submit (UI only):', data);
     };
 
+    const blankInput = 'w-24 px-1 text-center h-7';
+
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
@@ -46,7 +157,103 @@ export function ExploracionOftalmologicaFormTab({
                 </Button>
             </div>
 
-            {/* Form fields go here */}
+            <div className="relative grid grid-cols-1 gap-12 md:grid-cols-2">
+                {/* Separator line in the middle */}
+                <div className="absolute top-0 bottom-0 left-1/2 hidden w-px -translate-x-1/2 bg-border/60 md:block" />
+
+                {/* Left Column: Ojo Derecho */}
+                <div className="space-y-6">
+                    <h3 className="mb-6 border-b pb-2 text-center text-lg font-medium tracking-tight text-lumax-purple">
+                        Ojo derecho
+                    </h3>
+
+                    <MeasurementsGroup
+                        title="Agudeza visual sin corrección"
+                        prefix="od_sin"
+                        register={register}
+                    />
+
+                    <MeasurementsGroup
+                        title="Agudeza visual con corrección"
+                        prefix="od_con"
+                        register={register}
+                    />
+
+                    {/* Extras */}
+                    <div className="space-y-4 pt-4">
+                        <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-40 font-medium">Adición</span>
+                            <Input
+                                className={blankInput}
+                                {...register('od_adicion')}
+                            />
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-40 font-medium">
+                                Distancia interpupilar
+                            </span>
+                            <Input
+                                className={blankInput}
+                                {...register('od_distancia')}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: Ojo Izquierdo */}
+                <div className="space-y-6">
+                    <h3 className="mb-6 border-b pb-2 text-center text-lg font-medium tracking-tight text-lumax-purple">
+                        Ojo izquierdo
+                    </h3>
+
+                    <MeasurementsGroup
+                        title="Agudeza visual sin corrección"
+                        prefix="oi_sin"
+                        register={register}
+                    />
+
+                    <MeasurementsGroup
+                        title="Agudeza visual con corrección"
+                        prefix="oi_con"
+                        register={register}
+                    />
+
+                    {/* Extras */}
+                    <div className="space-y-4 pt-4">
+                        <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-40 font-medium">Adición</span>
+                            <Input
+                                className={blankInput}
+                                {...register('oi_adicion')}
+                            />
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-40 font-medium">
+                                Distancia interpupilar
+                            </span>
+                            <Input
+                                className={blankInput}
+                                {...register('oi_distancia')}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Comments */}
+            <div className="border-t pt-6">
+                <Label
+                    htmlFor="comentarios"
+                    className="mb-2 block text-base font-semibold"
+                >
+                    Comentarios
+                </Label>
+                <Textarea
+                    id="comentarios"
+                    className="min-h-[120px]"
+                    {...register('comentarios')}
+                />
+            </div>
         </form>
     );
 }

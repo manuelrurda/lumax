@@ -100,7 +100,7 @@ export function AntecedentesOftalmologicosFormTab({
             <div className="grid grid-cols-1 gap-8 divide-border lg:grid-cols-2 lg:divide-x">
                 {/* Lentes Aéreos */}
                 <div className="space-y-6 lg:pr-4">
-                    <h3 className="border-b pb-2 text-lg font-medium tracking-tight">
+                    <h3 className="border-b pb-2 text-lg font-medium tracking-tight text-lumax-purple">
                         Lentes aéreos
                     </h3>
 
@@ -131,7 +131,7 @@ export function AntecedentesOftalmologicosFormTab({
                 {/* Lentes de Contacto */}
                 <div className="space-y-6 pt-6 lg:pt-0 lg:pl-10">
                     <div className="flex flex-col justify-between gap-4 border-b pb-2 sm:flex-row sm:items-center">
-                        <h3 className="text-lg font-medium tracking-tight">
+                        <h3 className="text-lg font-medium tracking-tight text-lumax-purple">
                             Lentes de contacto
                         </h3>
                         <div className="flex items-center gap-6">
