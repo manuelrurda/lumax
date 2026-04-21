@@ -1,12 +1,14 @@
 import AppLayout from '@/layouts/app-layout';
-import { Patient, type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import { EstrabogramaFormTab } from './forms/estrabograma-form';
 import { PatientRecordLayout } from './patient-record-layout';
+import { PatientEstrabogramaTab } from './schemas/estrabograma';
 
 export default function PatientEstrabograma({
     patient,
 }: {
-    patient: Patient;
+    patient: PatientEstrabogramaTab;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Pacientes', href: '/patients' },
@@ -24,8 +26,9 @@ export default function PatientEstrabograma({
                 patient={patient}
                 currentTab="estrabograma"
             >
-                <div></div>
+                <EstrabogramaFormTab patient={patient} />
             </PatientRecordLayout>
         </AppLayout>
     );
 }
+
