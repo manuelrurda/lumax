@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
     defaultEstrabograma,
@@ -22,17 +23,36 @@ export function EstrabogramaFormTab({
 }) {
     const [isSaving, setIsSaving] = useState(false);
 
+    const draftKey = `patient-${patient.id}-estrabograma`;
+    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const setDraft = useDraftStore((state) => state.setDraft);
+    const clearDraft = useDraftStore((state) => state.clearDraft);
+
+    const initialData = draftState || patient.estrabograma || {};
+
     const {
         register,
         handleSubmit,
         reset,
+        getValues,
         formState: { isDirty },
     } = useForm<EstrabogramaForm>({
         defaultValues: {
             ...defaultEstrabograma,
-            ...(patient.estrabograma || {}),
+            ...(initialData || {}),
         },
     });
+
+    const isDirtyRef = useRef(isDirty);
+    isDirtyRef.current = isDirty;
+
+    useEffect(() => {
+        return () => {
+            if (isDirtyRef.current) {
+                setDraft(draftKey, getValues());
+            }
+        };
+    }, [draftKey, setDraft, getValues]);
 
     const onSubmit = (data: EstrabogramaForm) => {
         setIsSaving(true);
@@ -45,6 +65,7 @@ export function EstrabogramaFormTab({
             {
                 onSuccess: () => {
                     setIsSaving(false);
+                    clearDraft(draftKey);
                     // Update default values to new ones, thus clearing isDirty
                     reset({}, { keepValues: true });
                 },
@@ -65,7 +86,7 @@ export function EstrabogramaFormTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty || isSaving}
+                    disabled={(!isDirty && !draftState) || isSaving}
                 >
                     {isSaving ? (
                         <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
