@@ -112,7 +112,7 @@ class PatientsController extends Controller
     public function exploracionOftalmologica(Request $request, $id): Response
     {
         $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'exploracion_oftalmologica', 'updated_at')
             ->findOrFail($id);
 
         return Inertia::render('patients/records/exploracion-oftalmologica', [

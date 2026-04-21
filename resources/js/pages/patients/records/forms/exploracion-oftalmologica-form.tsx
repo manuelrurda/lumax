@@ -2,8 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save } from 'lucide-react';
-import { useForm, UseFormRegister } from 'react-hook-form';
+import { router } from '@inertiajs/react';
+import { LoaderCircle, Save } from 'lucide-react';
+import { useState } from 'react';
+import { UseFormRegister, useForm } from 'react-hook-form';
 import {
     defaultExploracionOftalmologica,
     ExploracionOftalmologicaForm,
@@ -121,9 +123,12 @@ export function ExploracionOftalmologicaFormTab({
 }: {
     patient: PatientExploracionOftalmologicaTab;
 }) {
+    const [isSaving, setIsSaving] = useState(false);
+
     const {
         register,
         handleSubmit,
+        reset,
         formState: { isDirty },
     } = useForm<ExploracionOftalmologicaForm>({
         defaultValues: {
@@ -133,7 +138,23 @@ export function ExploracionOftalmologicaFormTab({
     });
 
     const onSubmit = (data: ExploracionOftalmologicaForm) => {
-        console.log('Exploración Oftalmológica submit (UI only):', data);
+        setIsSaving(true);
+        router.put(
+            `/patients/${patient.id}`,
+            {
+                ...patient,
+                exploracion_oftalmologica: data,
+            } as any,
+            {
+                onSuccess: () => {
+                    setIsSaving(false);
+                    // Update default values to new ones, thus clearing isDirty
+                    reset({}, { keepValues: true });
+                },
+                onError: () => setIsSaving(false),
+                preserveScroll: true,
+            },
+        );
     };
 
     const blankInput = 'w-24 px-1 text-center h-7';
@@ -150,9 +171,13 @@ export function ExploracionOftalmologicaFormTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty}
+                    disabled={!isDirty || isSaving}
                 >
-                    <Save className="mr-2 h-4 w-4" />
+                    {isSaving ? (
+                        <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Save className="mr-2 h-4 w-4" />
+                    )}
                     Guardar cambios
                 </Button>
             </div>
