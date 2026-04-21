@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Save } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { LoaderCircle, Save } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
     defaultEstrabograma,
@@ -18,9 +20,12 @@ export function EstrabogramaFormTab({
 }: {
     patient: PatientEstrabogramaTab;
 }) {
+    const [isSaving, setIsSaving] = useState(false);
+
     const {
         register,
         handleSubmit,
+        reset,
         formState: { isDirty },
     } = useForm<EstrabogramaForm>({
         defaultValues: {
@@ -30,7 +35,23 @@ export function EstrabogramaFormTab({
     });
 
     const onSubmit = (data: EstrabogramaForm) => {
-        console.log('Estrabograma submit (UI only):', data);
+        setIsSaving(true);
+        router.put(
+            `/patients/${patient.id}`,
+            {
+                ...patient,
+                estrabograma: data,
+            } as any,
+            {
+                onSuccess: () => {
+                    setIsSaving(false);
+                    // Update default values to new ones, thus clearing isDirty
+                    reset({}, { keepValues: true });
+                },
+                onError: () => setIsSaving(false),
+                preserveScroll: true,
+            },
+        );
     };
 
     return (
@@ -44,9 +65,13 @@ export function EstrabogramaFormTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty}
+                    disabled={!isDirty || isSaving}
                 >
-                    <Save className="mr-2 h-4 w-4" />
+                    {isSaving ? (
+                        <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Save className="mr-2 h-4 w-4" />
+                    )}
                     Guardar cambios
                 </Button>
             </div>

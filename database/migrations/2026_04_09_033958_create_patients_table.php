@@ -25,6 +25,7 @@ return new class extends Migration
             $table->jsonb('antecedentes')->nullable();
             $table->jsonb('antecedentes_oftalmologicos')->nullable();
             $table->jsonb('exploracion_fisica')->nullable();
+            $table->jsonb('estrabograma')->nullable();
             
             $table->timestamps();
         });

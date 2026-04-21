@@ -17,6 +17,7 @@ class Patient extends Model
         'antecedentes',
         'antecedentes_oftalmologicos',
         'exploracion_fisica',
+        'estrabograma',
     ];
 
     protected function casts(): array
@@ -25,6 +26,7 @@ class Patient extends Model
             'antecedentes' => 'array',
             'antecedentes_oftalmologicos' => 'array',
             'exploracion_fisica' => 'array',
+            'estrabograma' => 'array',
         ];
     }
 
