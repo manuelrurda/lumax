@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 export interface AppointmentFormData {
     id?: number;
     patientId: number;
+    patientName?: string;
     title: string;
     start: Date;
     end: Date;
@@ -48,9 +49,12 @@ export function AppointmentDialog({
 
     const [patientId, setPatientId] = useState<string>('');
     const [title, setTitle] = useState('');
-    const [start, setStart] = useState('');
-    const [end, setEnd] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [endTime, setEndTime] = useState('');
     const [notes, setNotes] = useState('');
+    const [error, setError] = useState('');
 
     const [patientSearch, setPatientSearch] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
@@ -85,30 +89,53 @@ export function AppointmentDialog({
             setPatientId(
                 initialData?.patientId ? String(initialData.patientId) : '',
             );
+            setPatientSearch(initialData?.patientName || '');
             setTitle(initialData?.title || '');
-            setStart(
-                initialData?.start
-                    ? format(initialData.start, "yyyy-MM-dd'T'HH:mm")
-                    : '',
-            );
-            setEnd(
-                initialData?.end
-                    ? format(initialData.end, "yyyy-MM-dd'T'HH:mm")
-                    : '',
-            );
+            
+            setStartDate(initialData?.start ? format(initialData.start, 'yyyy-MM-dd') : '');
+            setStartTime(initialData?.start ? format(initialData.start, 'HH:mm') : '');
+            
+            setEndDate(initialData?.end ? format(initialData.end, 'yyyy-MM-dd') : '');
+            setEndTime(initialData?.end ? format(initialData.end, 'HH:mm') : '');
+
             setNotes(initialData?.notes || '');
+            setError('');
         }
     }, [open, initialData]);
 
+    useEffect(() => {
+        if (startDate && startTime && endDate && endTime) {
+            const startDt = new Date(`${startDate}T${startTime}`);
+            const endDt = new Date(`${endDate}T${endTime}`);
+            if (endDt <= startDt) {
+                setError('La fecha y hora de fin debe ser posterior a la de inicio.');
+            } else if (error === 'La fecha y hora de fin debe ser posterior a la de inicio.') {
+                setError('');
+            }
+        }
+    }, [startDate, startTime, endDate, endTime]);
+
     const handleSave = () => {
-        if (!patientId || !title || !start || !end) return;
+        setError('');
+        if (!patientId || !title || !startDate || !startTime || !endDate || !endTime) {
+            setError('Todos los campos obligatorios deben ser completados.');
+            return;
+        }
+
+        const startDt = new Date(`${startDate}T${startTime}`);
+        const endDt = new Date(`${endDate}T${endTime}`);
+
+        if (endDt <= startDt) {
+            setError('La fecha y hora de fin debe ser posterior a la de inicio.');
+            return;
+        }
 
         onSave({
             id: initialData?.id,
             patientId: Number(patientId),
             title,
-            start: new Date(start),
-            end: new Date(end),
+            start: startDt,
+            end: endDt,
             notes,
         });
         onOpenChange(false);
@@ -116,7 +143,10 @@ export function AppointmentDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent 
+                className="sm:max-w-[500px]"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+            >
                 <DialogHeader>
                     <DialogTitle>
                         {isEditing ? 'Editar cita' : 'Nueva cita'}
@@ -125,7 +155,9 @@ export function AppointmentDialog({
 
                 <div className="grid gap-4 py-4">
                     <div className="relative grid gap-2">
-                        <Label htmlFor="patient">Paciente</Label>
+                        <Label htmlFor="patient">
+                            Paciente <span className="text-destructive">*</span>
+                        </Label>
                         <Input
                             id="patient"
                             placeholder="Buscar paciente..."
@@ -134,6 +166,7 @@ export function AppointmentDialog({
                                 setPatientSearch(e.target.value);
                                 setPatientId('');
                                 setShowDropdown(true);
+                                setError('');
                             }}
                             onFocus={() => setShowDropdown(true)}
                             onBlur={() =>
@@ -170,6 +203,7 @@ export function AppointmentDialog({
                                                                 `${p.first_name} ${p.last_name} - Revisión`,
                                                             );
                                                         }
+                                                        setError('');
                                                     }}
                                                 >
                                                     {p.first_name} {p.last_name}
@@ -182,33 +216,71 @@ export function AppointmentDialog({
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="title">Título</Label>
+                        <Label htmlFor="title">
+                            Título <span className="text-destructive">*</span>
+                        </Label>
                         <Input
                             id="title"
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            onChange={(e) => {
+                                setTitle(e.target.value);
+                                setError('');
+                            }}
                             placeholder="Ej. Revisión anual"
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="start">Inicio</Label>
-                            <Input
-                                id="start"
-                                type="datetime-local"
-                                value={start}
-                                onChange={(e) => setStart(e.target.value)}
-                            />
+                    <div className="grid gap-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="startDate">
+                                    Fecha Inicio <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="startDate"
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => {
+                                        setStartDate(e.target.value);
+                                        if (!endDate) setEndDate(e.target.value);
+                                    }}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="startTime">
+                                    Hora Inicio <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="startTime"
+                                    type="time"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                />
+                            </div>
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="end">Fin</Label>
-                            <Input
-                                id="end"
-                                type="datetime-local"
-                                value={end}
-                                onChange={(e) => setEnd(e.target.value)}
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="endDate">
+                                    Fecha Fin <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="endDate"
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="endTime">
+                                    Hora Fin <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="endTime"
+                                    type="time"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -221,6 +293,12 @@ export function AppointmentDialog({
                             placeholder="Notas opcionales..."
                         />
                     </div>
+
+                    {error && (
+                        <div className="text-sm font-medium text-destructive">
+                            {error}
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter className="flex justify-between sm:justify-between">
@@ -244,7 +322,7 @@ export function AppointmentDialog({
                         >
                             Cancelar
                         </Button>
-                        <Button onClick={handleSave}>Guardar</Button>
+                        <Button onClick={handleSave} disabled={!!error}>Guardar</Button>
                     </div>
                 </DialogFooter>
             </DialogContent>

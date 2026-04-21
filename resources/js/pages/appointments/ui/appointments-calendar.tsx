@@ -25,13 +25,14 @@ const DnDCalendar = withDragAndDrop(Calendar);
 interface BackendEvent extends Event {
     id: number;
     patientId: number;
+    patientName: string;
     notes?: string;
 }
 
 export function AppointmentsCalendar() {
     const [events, setEvents] = useState<BackendEvent[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogData, setDialogData] = useState<Partial<AppointmentFormData> | null>(null);
+    const [dialogData, setDialogData] = useState<Partial<AppointmentFormData & { patientName: string }> | null>(null);
 
     const fetchEvents = async (range?: Date[] | { start: Date; end: Date }) => {
         try {
@@ -47,6 +48,7 @@ export function AppointmentsCalendar() {
                 data.map((e: any) => ({
                     id: e.id,
                     patientId: e.patient_id,
+                    patientName: e.patient ? `${e.patient.first_name} ${e.patient.last_name}` : '',
                     title: e.title,
                     notes: e.notes,
                     start: new Date(e.starts_at),
@@ -87,7 +89,7 @@ export function AppointmentsCalendar() {
     };
 
     const handleSelectSlot = ({ start, end }: { start: Date; end: Date }) => {
-        setDialogData({ start, end, title: '', notes: '' });
+        setDialogData({ start, end, title: '', notes: '', patientName: '' });
         setDialogOpen(true);
     };
 
@@ -96,6 +98,7 @@ export function AppointmentsCalendar() {
         setDialogData({
             id: event.id,
             patientId: event.patientId,
+            patientName: event.patientName,
             title: event.title as string,
             start: event.start as Date,
             end: event.end as Date,
