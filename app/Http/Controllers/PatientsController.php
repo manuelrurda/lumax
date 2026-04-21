@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePatientRequest;
 use App\Models\Patient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,11 +21,11 @@ class PatientsController extends Controller
         $query = $request->user()->patients()->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at');
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = strtolower($request->search);
             $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'LIKE', "%{$search}%")
-                  ->orWhere('last_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%")
+                $q->where(DB::raw('LOWER(first_name)'), 'LIKE', "%{$search}%")
+                  ->orWhere(DB::raw('LOWER(last_name)'), 'LIKE', "%{$search}%")
+                  ->orWhere(DB::raw('LOWER(email)'), 'LIKE', "%{$search}%")
                   ->orWhere('phone', 'LIKE', "%{$search}%");
             });
         }
@@ -48,6 +49,24 @@ class PatientsController extends Controller
             'patients' => $patients,
             'filters' => (object) $request->only(['search', 'sort']),
         ]);
+    }
+
+    /**
+     * Search patients returning JSON for autocomplete.
+     */
+    public function searchApi(Request $request)
+    {
+        $query = $request->user()->patients()->select('id', 'first_name', 'last_name');
+
+        if ($request->filled('q')) {
+            $search = strtolower($request->q);
+            $query->where(function ($q) use ($search) {
+                $q->where(\Illuminate\Support\Facades\DB::raw('LOWER(first_name)'), 'LIKE', "%{$search}%")
+                  ->orWhere(\Illuminate\Support\Facades\DB::raw('LOWER(last_name)'), 'LIKE', "%{$search}%");
+            });
+        }
+
+        return response()->json($query->limit(10)->get());
     }
 
     /**
