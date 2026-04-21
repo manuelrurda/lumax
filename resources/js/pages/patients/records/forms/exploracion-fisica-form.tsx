@@ -2,9 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
     defaultExploracionFisica,
@@ -19,17 +20,36 @@ export function ExploracionFisicaFormTab({
 }) {
     const [isSaving, setIsSaving] = useState(false);
 
+    const draftKey = `patient-${patient.id}-exploracion-fisica`;
+    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const setDraft = useDraftStore((state) => state.setDraft);
+    const clearDraft = useDraftStore((state) => state.clearDraft);
+
+    const initialData = draftState || patient.exploracion_fisica || {};
+
     const {
         register,
         handleSubmit,
         reset,
+        getValues,
         formState: { isDirty },
     } = useForm<ExploracionFisicaForm>({
         defaultValues: {
             ...defaultExploracionFisica,
-            ...(patient.exploracion_fisica || {}),
+            ...(initialData || {}),
         },
     });
+
+    const isDirtyRef = useRef(isDirty);
+    isDirtyRef.current = isDirty;
+
+    useEffect(() => {
+        return () => {
+            if (isDirtyRef.current) {
+                setDraft(draftKey, getValues());
+            }
+        };
+    }, [draftKey, setDraft, getValues]);
 
     const onSubmit = (data: ExploracionFisicaForm) => {
         setIsSaving(true);
@@ -42,6 +62,7 @@ export function ExploracionFisicaFormTab({
             {
                 onSuccess: () => {
                     setIsSaving(false);
+                    clearDraft(draftKey);
                     // Update default values to new ones, thus clearing isDirty
                     reset({}, { keepValues: true });
                 },
@@ -61,7 +82,7 @@ export function ExploracionFisicaFormTab({
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
-                    disabled={!isDirty || isSaving}
+                    disabled={(!isDirty && !draftState) || isSaving}
                 >
                     {isSaving ? (
                         <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
