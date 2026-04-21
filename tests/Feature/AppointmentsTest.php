@@ -164,4 +164,77 @@ class AppointmentsTest extends TestCase
             'id' => $appointment->id,
         ]);
     }
+
+    public function test_cannot_create_overlapping_appointment() // ... (keep the rest)
+    {
+        $user = User::factory()->create();
+        $patient = Patient::factory()->create();
+
+        Appointment::create([
+            'user_id' => $user->id,
+            'patient_id' => $patient->id,
+            'title' => 'First Appointment',
+            'starts_at' => now()->addDays(2)->setHour(10)->setMinute(0)->toDateTimeString(),
+            'ends_at' => now()->addDays(2)->setHour(11)->setMinute(0)->toDateTimeString(),
+        ]);
+
+        $payload = [
+            'patient_id' => $patient->id,
+            'title' => 'Overlapping Checkup',
+            'starts_at' => now()->addDays(2)->setHour(10)->setMinute(30)->toDateTimeString(),
+            'ends_at' => now()->addDays(2)->setHour(11)->setMinute(30)->toDateTimeString(),
+            'notes' => 'Some notes here',
+        ];
+
+        $this->from('/appointments');
+
+        $response = $this->actingAs($user)->post('/appointments', $payload);
+
+        $response->assertRedirect('/appointments');
+        $response->assertSessionHas('error');
+
+        $this->assertDatabaseMissing('appointments', [
+            'title' => 'Overlapping Checkup',
+        ]);
+    }
+
+    public function test_cannot_update_to_overlapping_appointment()
+    {
+        $user = User::factory()->create();
+        $patient = Patient::factory()->create();
+
+        Appointment::create([
+            'user_id' => $user->id,
+            'patient_id' => $patient->id,
+            'title' => 'First Appointment',
+            'starts_at' => now()->addDays(2)->setHour(10)->setMinute(0)->toDateTimeString(),
+            'ends_at' => now()->addDays(2)->setHour(11)->setMinute(0)->toDateTimeString(),
+        ]);
+
+        $appointmentToUpdate = Appointment::create([
+            'user_id' => $user->id,
+            'patient_id' => $patient->id,
+            'title' => 'Second Appointment',
+            'starts_at' => now()->addDays(3)->setHour(10)->setMinute(0)->toDateTimeString(),
+            'ends_at' => now()->addDays(3)->setHour(11)->setMinute(0)->toDateTimeString(),
+        ]);
+
+        $payload = [
+            'starts_at' => now()->addDays(2)->setHour(10)->setMinute(30)->toDateTimeString(),
+            'ends_at' => now()->addDays(2)->setHour(11)->setMinute(30)->toDateTimeString(),
+        ];
+
+        $this->from('/appointments');
+
+        $response = $this->actingAs($user)->put('/appointments/' . $appointmentToUpdate->id, $payload);
+
+        $response->assertRedirect('/appointments');
+        $response->assertSessionHas('error');
+
+        $this->assertDatabaseHas('appointments', [
+            'id' => $appointmentToUpdate->id,
+            'title' => 'Second Appointment',
+            'starts_at' => now()->addDays(3)->setHour(10)->setMinute(0)->toDateTimeString(),
+        ]);
+    }
 }

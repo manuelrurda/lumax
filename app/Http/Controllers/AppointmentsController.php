@@ -47,6 +47,15 @@ class AppointmentsController extends Controller
             'ends_at' => 'required|date|after:starts_at',
         ]);
 
+        $overlapping = $request->user()->appointments()
+            ->where('starts_at', '<', Carbon::parse($validated['ends_at']))
+            ->where('ends_at', '>', Carbon::parse($validated['starts_at']))
+            ->exists();
+
+        if ($overlapping) {
+            return redirect()->back()->with('error', 'El horario seleccionado se superpone con otra cita existente.');
+        }
+
         $appointment = $request->user()->appointments()->create($validated);
 
         return redirect()->back()->with('success', 'Cita creada exitosamente.');
@@ -65,6 +74,19 @@ class AppointmentsController extends Controller
             'starts_at' => 'sometimes|date',
             'ends_at' => 'sometimes|date|after:starts_at',
         ]);
+
+        $startsAt = isset($validated['starts_at']) ? Carbon::parse($validated['starts_at']) : Carbon::parse($appointment->starts_at);
+        $endsAt = isset($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : Carbon::parse($appointment->ends_at);
+
+        $overlapping = $request->user()->appointments()
+            ->where('id', '!=', $appointment->id)
+            ->where('starts_at', '<', $endsAt)
+            ->where('ends_at', '>', $startsAt)
+            ->exists();
+
+        if ($overlapping) {
+            return redirect()->back()->with('error', 'El horario seleccionado se superpone con otra cita existente.');
+        }
 
         $appointment->update($validated);
 
