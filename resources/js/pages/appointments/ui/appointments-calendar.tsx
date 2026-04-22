@@ -6,10 +6,13 @@ import { Calendar, dateFnsLocalizer, Event } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { AppointmentDialog, type AppointmentFormData } from './appointment-dialog';
+import {
+    AppointmentDialog,
+    type AppointmentFormData,
+} from './appointment-dialog';
 
 const locales = {
-    'es': es,
+    es: es,
 };
 
 const localizer = dateFnsLocalizer({
@@ -32,7 +35,9 @@ interface BackendEvent extends Event {
 export function AppointmentsCalendar() {
     const [events, setEvents] = useState<BackendEvent[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogData, setDialogData] = useState<Partial<AppointmentFormData & { patientName: string }> | null>(null);
+    const [dialogData, setDialogData] = useState<Partial<
+        AppointmentFormData & { patientName: string }
+    > | null>(null);
 
     const fetchEvents = async (range?: Date[] | { start: Date; end: Date }) => {
         try {
@@ -48,7 +53,9 @@ export function AppointmentsCalendar() {
                 data.map((e: any) => ({
                     id: e.id,
                     patientId: e.patient_id,
-                    patientName: e.patient ? `${e.patient.first_name} ${e.patient.last_name}` : '',
+                    patientName: e.patient
+                        ? `${e.patient.first_name} ${e.patient.last_name}`
+                        : '',
                     title: e.title,
                     notes: e.notes,
                     start: new Date(e.starts_at),
@@ -70,9 +77,9 @@ export function AppointmentsCalendar() {
             `/appointments/${event.id}`,
             {
                 starts_at: start.toISOString(),
-                ends_at: end.toISOString()
+                ends_at: end.toISOString(),
             },
-            { onSuccess: () => fetchEvents() }
+            { onSuccess: () => fetchEvents() },
         );
     };
 
@@ -82,9 +89,9 @@ export function AppointmentsCalendar() {
             `/appointments/${event.id}`,
             {
                 starts_at: start.toISOString(),
-                ends_at: end.toISOString()
+                ends_at: end.toISOString(),
             },
-            { onSuccess: () => fetchEvents() }
+            { onSuccess: () => fetchEvents() },
         );
     };
 
@@ -143,7 +150,7 @@ export function AppointmentsCalendar() {
     };
 
     return (
-        <div className="h-full w-full">
+        <div className="lumax-calendar h-full w-full">
             <DnDCalendar
                 localizer={localizer}
                 culture="es"

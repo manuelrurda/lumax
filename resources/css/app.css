@@ -150,3 +150,201 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer components {
+    /* Calendar Base Structure */
+    .lumax-calendar .rbc-calendar {
+        height: 100%;
+        min-height: 700px;
+        font-family: var(--font-sans);
+    }
+
+    /* Headings and Base Text */
+    .lumax-calendar .rbc-header {
+        padding: 0.75rem 0;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--foreground);
+    }
+    
+    .lumax-calendar .rbc-time-header.rbc-overflowing {
+        border-right: none;
+    }
+
+    .lumax-calendar .rbc-time-view,
+    .lumax-calendar .rbc-month-view,
+    .lumax-calendar .rbc-agenda-view {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background-color: var(--background);
+        border-collapse: separate;
+        overflow: hidden;
+    }
+
+    /* Borders & Grids */
+    .lumax-calendar .rbc-day-bg + .rbc-day-bg,
+    .lumax-calendar .rbc-month-row + .rbc-month-row,
+    .lumax-calendar .rbc-header + .rbc-header,
+    .lumax-calendar .rbc-time-content,
+    .lumax-calendar .rbc-time-header-content {
+        border-color: var(--border);
+    }
+
+    .lumax-calendar .rbc-time-content > * + * > * {
+        border-left: 1px solid var(--border);
+    }
+
+    .lumax-calendar .rbc-timeslot-group {
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .lumax-calendar .rbc-time-gutter .rbc-timeslot-group {
+        border-bottom: none;
+    }
+
+    /* Labels / Times */
+    .lumax-calendar .rbc-time-gutter .rbc-timeslot-group {
+        color: var(--muted-foreground);
+        font-size: 0.75rem;
+        padding-right: 8px;
+    }
+
+    /* Today highlight */
+    .lumax-calendar .rbc-today {
+        background-color: oklch(0.97 0.015 278.64) !important;
+    }
+    .dark .lumax-calendar .rbc-today {
+        background-color: oklch(0.24 0.02 278.64) !important;
+    }
+
+    /* Current Time Indicator */
+    .lumax-calendar .rbc-current-time-indicator {
+        background-color: oklch(0.6429 0.1409 50.57) !important;
+        height: 2px !important;
+        z-index: 5 !important;
+    }
+    .lumax-calendar .rbc-current-time-indicator::before {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: oklch(0.6429 0.1409 50.57);
+        left: -4px;
+        top: -3px;
+    }
+
+    /* Events Styling (Purple Theme) */
+    .lumax-calendar .rbc-event,
+    .lumax-calendar .rbc-day-slot .rbc-background-event {
+        background-color: oklch(0.3426 0.1128 278.64) !important;
+        border: none !important;
+        border-radius: var(--radius-sm);
+        padding: 4px 6px;
+        color: white !important;
+        transition: background-color 0.2s, opacity 0.2s, outline 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .dark .lumax-calendar .rbc-event,
+    .dark .lumax-calendar .rbc-day-slot .rbc-background-event {
+        background-color: oklch(0.3939 0.1128 278.64) !important;
+    }
+
+    .lumax-calendar .rbc-event:focus,
+    .lumax-calendar .rbc-event:hover {
+        background-color: oklch(0.2908 0.1128 278.64) !important;
+        outline: 2px solid var(--ring);
+        outline-offset: 1px;
+    }
+
+    .lumax-calendar .rbc-event-content {
+        font-size: 0.825rem;
+        font-weight: 500;
+        line-height: 1.25;
+    }
+
+    .lumax-calendar .rbc-event-label {
+        font-size: 0.7rem;
+        opacity: 0.85;
+        margin-bottom: 2px;
+        font-weight: 600;
+    }
+
+    /* Currently dragging/resizing event */
+    .lumax-calendar .rbc-addons-dnd-dragged-event,
+    .lumax-calendar .rbc-addons-dnd-resizable-event {
+        opacity: 0.7;
+    }
+
+    /* Toolbar Overrides (Shadcn style buttons) */
+    .lumax-calendar .rbc-toolbar {
+        margin-bottom: 1.25rem;
+        font-family: var(--font-sans);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .lumax-calendar .rbc-btn-group {
+        display: flex;
+        gap: 0;
+        border-radius: var(--radius-md);
+        background: var(--background);
+    }
+
+    .lumax-calendar .rbc-btn-group button {
+        background: var(--background);
+        border: 1px solid var(--border);
+        color: var(--foreground);
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: background-color 0.15s, color 0.15s;
+    }
+    
+    .lumax-calendar .rbc-btn-group button:first-child {
+        border-top-left-radius: var(--radius-md);
+        border-bottom-left-radius: var(--radius-md);
+    }
+
+    .lumax-calendar .rbc-btn-group button:last-child {
+        border-top-right-radius: var(--radius-md);
+        border-bottom-right-radius: var(--radius-md);
+    }
+    
+    .lumax-calendar .rbc-btn-group button + button {
+        margin-left: -1px; /* Overlap borders */
+    }
+
+    .lumax-calendar .rbc-toolbar button:hover {
+        background: var(--accent);
+        color: var(--accent-foreground);
+    }
+
+    .lumax-calendar .rbc-toolbar button:active,
+    .lumax-calendar .rbc-toolbar button.rbc-active {
+        background: oklch(0.3426 0.1128 278.64);
+        color: white;
+        border-color: oklch(0.3426 0.1128 278.64);
+        z-index: 10;
+        box-shadow: none;
+    }
+
+    .lumax-calendar .rbc-toolbar button:focus {
+        outline: none;
+        position: relative;
+        z-index: 20;
+    }
+    
+    .lumax-calendar .rbc-toolbar button.rbc-active:hover {
+        background: oklch(0.2908 0.1128 278.64);
+    }
+
+    .lumax-calendar .rbc-toolbar .rbc-toolbar-label {
+        font-weight: 600;
+        font-size: 1.125rem;
+        color: var(--foreground);
+    }
+}
