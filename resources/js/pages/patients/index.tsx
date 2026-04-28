@@ -16,6 +16,7 @@ import { ExternalLink, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreatePatientDialog } from './ui/create-patient-dialog';
 import { EditPatientDialog } from './ui/edit-patient-dialog';
+import { TodaysAppointments } from './ui/todays-appointments';
 import { PatientsSortSelect } from './ui/patients-sort-select';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -26,12 +27,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function PatientsPage() {
-    const { patients, filters } = usePage<{
+    const { patients, filters, todaysAppointments } = usePage<{
         patients: PaginatedData<Patient>;
         filters: { search?: string; sort?: string };
+        todaysAppointments: any[];
     }>().props;
     const [searchTerm, setSearchTerm] = useState(filters?.search || '');
-    const [sortBy, setSortBy] = useState(typeof filters?.sort === 'string' ? filters.sort : 'latest');
+    const [sortBy, setSortBy] = useState(
+        typeof filters?.sort === 'string' ? filters.sort : 'latest',
+    );
 
     const handleSortChange = (value: string) => {
         setSortBy(value);
@@ -65,12 +69,7 @@ export default function PatientsPage() {
             <Head title="Pacientes" />
 
             <div className="flex h-full flex-1 flex-col p-6">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold">Pacientes</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Gestión de registros de pacientes
-                    </p>
-                </div>
+                <TodaysAppointments appointments={todaysAppointments} />
 
                 <div className="mb-4 flex items-center justify-between gap-4">
                     <div className="flex flex-1 items-center gap-4">

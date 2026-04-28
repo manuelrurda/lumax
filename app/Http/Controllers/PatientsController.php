@@ -45,9 +45,17 @@ class PatientsController extends Controller
 
         $patients = $query->paginate(10)->withQueryString();
 
+        $todaysAppointments = $request->user()->appointments()
+            ->with('patient')
+            ->where('starts_at', '>=', now())
+            ->where('starts_at', '<', now()->addDay()->startOfDay())
+            ->orderBy('starts_at')
+            ->get();
+
         return Inertia::render('patients/index', [
             'patients' => $patients,
             'filters' => (object) $request->only(['search', 'sort']),
+            'todaysAppointments' => $todaysAppointments,
         ]);
     }
 
