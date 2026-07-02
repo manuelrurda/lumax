@@ -6,8 +6,15 @@ import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useForm, UseFormRegister } from 'react-hook-form';
 import {
+    Control,
+    useForm,
+    UseFormRegister,
+    UseFormSetValue,
+    useWatch,
+} from 'react-hook-form';
+import {
+    agudezaVisualUnits,
     defaultRefraccion,
     PatientRefraccionTab,
     RefraccionForm,
@@ -17,11 +24,29 @@ function AgudezaVisualRow({
     label,
     namePrefix,
     register,
+    control,
+    setValue,
 }: {
     label: string;
     namePrefix: 'od_av_sin' | 'od_av_con' | 'oi_av_sin' | 'oi_av_con';
     register: UseFormRegister<RefraccionForm>;
+    control: Control<RefraccionForm>;
+    setValue: UseFormSetValue<RefraccionForm>;
 }) {
+    const selectedUnit = useWatch({
+        control,
+        name: `${namePrefix}_opt1`,
+    });
+
+    const activeValues =
+        selectedUnit && agudezaVisualUnits[selectedUnit]
+            ? agudezaVisualUnits[selectedUnit].values
+            : [];
+
+    const counterpartPrefix = namePrefix.endsWith('_sin')
+        ? (namePrefix.replace('_sin', '_con') as 'od_av_con' | 'oi_av_con')
+        : (namePrefix.replace('_con', '_sin') as 'od_av_sin' | 'oi_av_sin');
+
     return (
         <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
             <span className="font-medium text-muted-foreground sm:w-48">
@@ -29,28 +54,38 @@ function AgudezaVisualRow({
             </span>
             <div className="flex items-center gap-1.5">
                 <select
-                    className="h-7 w-20 rounded-md border border-input bg-background px-2 py-0 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                    className="h-7 w-36 rounded-md border border-input bg-background px-2 py-0 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                     defaultValue=""
                     {...register(`${namePrefix}_opt1`)}
+                    onChange={(e) => {
+                        const newVal = e.target.value;
+                        register(`${namePrefix}_opt1`).onChange(e);
+                        setValue(`${namePrefix}_opt2`, '');
+
+                        // Sync counterpart unit
+                        setValue(`${counterpartPrefix}_opt1`, newVal, { shouldDirty: true });
+                        setValue(`${counterpartPrefix}_opt2`, '', { shouldDirty: true });
+                    }}
                 >
-                    <option value=""></option>
-                    <option value="20">20</option>
+                    <option value="">Unidad</option>
+                    {Object.entries(agudezaVisualUnits).map(([key, unit]) => (
+                        <option key={key} value={key}>
+                            {unit.label}
+                        </option>
+                    ))}
                 </select>
-                <span className="font-semibold text-muted-foreground">/</span>
                 <select
-                    className="h-7 w-20 rounded-md border border-input bg-background px-2 py-0 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                    className="h-7 w-28 rounded-md border border-input bg-background px-2 py-0 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                     defaultValue=""
+                    disabled={!selectedUnit}
                     {...register(`${namePrefix}_opt2`)}
                 >
-                    <option value=""></option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                    <option value="30">30</option>
-                    <option value="40">40</option>
-                    <option value="50">50</option>
-                    <option value="70">70</option>
-                    <option value="100">100</option>
-                    <option value="200">200</option>
+                    <option value="">Valor</option>
+                    {activeValues.map((val) => (
+                        <option key={val} value={val}>
+                            {val}
+                        </option>
+                    ))}
                 </select>
                 <Input
                     className="h-7 w-20 px-2 py-0 text-center"
@@ -183,6 +218,8 @@ export function RefraccionFormTab({
         handleSubmit,
         reset,
         getValues,
+        control,
+        setValue,
         formState: { isDirty },
     } = useForm<RefraccionForm>({
         defaultValues: {
@@ -261,11 +298,15 @@ export function RefraccionFormTab({
                             label="Agudeza visual sin corrección"
                             namePrefix="od_av_sin"
                             register={register}
+                            control={control}
+                            setValue={setValue}
                         />
                         <AgudezaVisualRow
                             label="Agudeza visual con corrección"
                             namePrefix="od_av_con"
                             register={register}
+                            control={control}
+                            setValue={setValue}
                         />
                     </div>
 
@@ -303,11 +344,15 @@ export function RefraccionFormTab({
                             label="Agudeza visual sin corrección"
                             namePrefix="oi_av_sin"
                             register={register}
+                            control={control}
+                            setValue={setValue}
                         />
                         <AgudezaVisualRow
                             label="Agudeza visual con corrección"
                             namePrefix="oi_av_con"
                             register={register}
+                            control={control}
+                            setValue={setValue}
                         />
                     </div>
 

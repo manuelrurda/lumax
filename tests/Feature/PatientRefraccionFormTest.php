@@ -47,11 +47,11 @@ class PatientRefraccionFormTest extends TestCase
             'phone' => '1234567890',
             'email' => 'house@example.com',
             'refraccion' => [
-                'od_av_sin_opt1' => '20',
-                'od_av_sin_opt2' => '40',
+                'od_av_sin_opt1' => 'snellen_20ft',
+                'od_av_sin_opt2' => '20/40',
                 'od_av_sin_input' => 'PH 20/20',
-                'od_av_con_opt1' => '20',
-                'od_av_con_opt2' => '20',
+                'od_av_con_opt1' => 'snellen_20ft',
+                'od_av_con_opt2' => '20/20',
                 'od_av_con_input' => '',
                 
                 'od_quera_1' => '44.50',
@@ -65,11 +65,11 @@ class PatientRefraccionFormTest extends TestCase
                 'od_adicion' => '+1.50',
                 'od_distancia' => '62',
                 
-                'oi_av_sin_opt1' => '20',
-                'oi_av_sin_opt2' => '50',
+                'oi_av_sin_opt1' => 'snellen_20ft',
+                'oi_av_sin_opt2' => '20/50',
                 'oi_av_sin_input' => '',
-                'oi_av_con_opt1' => '20',
-                'oi_av_con_opt2' => '25',
+                'oi_av_con_opt1' => 'snellen_20ft',
+                'oi_av_con_opt2' => '20/25',
                 'oi_av_con_input' => '',
                 
                 'oi_quera_1' => '44.25',
@@ -97,8 +97,8 @@ class PatientRefraccionFormTest extends TestCase
 
         $updatedPatient = Patient::find($patient->id);
         $this->assertNotNull($updatedPatient->refraccion);
-        $this->assertEquals('20', $updatedPatient->refraccion['od_av_sin_opt1']);
-        $this->assertEquals('40', $updatedPatient->refraccion['od_av_sin_opt2']);
+        $this->assertEquals('snellen_20ft', $updatedPatient->refraccion['od_av_sin_opt1']);
+        $this->assertEquals('20/40', $updatedPatient->refraccion['od_av_sin_opt2']);
         $this->assertEquals('PH 20/20', $updatedPatient->refraccion['od_av_sin_input']);
         $this->assertEquals('44.50', $updatedPatient->refraccion['od_quera_1']);
         $this->assertEquals('+1.50', $updatedPatient->refraccion['od_adicion']);

@@ -102,3 +102,26 @@ export const defaultRefraccion: RefraccionForm = {
 export type PatientRefraccionTab = Patient & {
     refraccion?: RefraccionForm | null;
 };
+
+export const agudezaVisualUnits: Record<string, { label: string; values: string[] }> = {
+    decimal: {
+        label: 'Decimal',
+        values: ['0,10', '0,12', '0,16', '0,20', '0,25', '0,32', '0,40', '0,50', '0,63', '0,80', '1,00', '1,25'],
+    },
+    fraccion: {
+        label: 'Fracción',
+        values: ['1/10', '1/8', '4/25', '1/5', '1/4', '1/3', '2/5', '1/2', '2/3,2', '4/5', '1/1', '5/4'],
+    },
+    snellen_6m: {
+        label: 'Snellen (6 m)',
+        values: ['6/60', '6/48', '6/37,5', '6/30', '6/24', '6/19', '6/15', '6/12', '6/9,5', '6/7,5', '6/6', '6/4,8'],
+    },
+    snellen_20ft: {
+        label: 'Snellen (20 pies)',
+        values: ['20/200', '20/160', '20/125', '20/100', '20/80', '20/63', '20/50', '20/40', '20/32', '20/25', '20/20', '20/16'],
+    },
+    logmar: {
+        label: 'logMAR',
+        values: ['1,0', '0,9', '0,8', '0,7', '0,6', '0,5', '0,4', '0,3', '0,2', '0,1', '0,0', '-0,1'],
+    },
+};
