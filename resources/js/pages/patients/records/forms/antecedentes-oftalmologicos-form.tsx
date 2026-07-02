@@ -6,7 +6,7 @@ import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, UseFormRegisterReturn } from 'react-hook-form';
 import {
     AntecedentesOftalmologicosForm,
     defaultAntecedentesOftalmologicos,
@@ -100,38 +100,25 @@ export function AntecedentesOftalmologicosFormTab({
             <div className="grid grid-cols-1 gap-8 divide-border lg:grid-cols-2 lg:divide-x">
                 {/* Lentes Aéreos */}
                 <div className="space-y-6 lg:pr-4">
-                    <h3 className="border-b pb-2 text-lg font-medium tracking-tight text-lumax-purple">
+                    <h3 className="border-b pb-2 text-lg font-semibold tracking-tight text-lumax-purple">
                         Lentes aéreos
                     </h3>
 
                     <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Última refracción</Label>
-                            <Input
-                                {...register('lentes_aereos.ultima_refraccion')}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Gotas</Label>
-                            <Input {...register('lentes_aereos.gotas')} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Cirugías previas</Label>
-                            <Input
-                                {...register('lentes_aereos.cirugias_previas')}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Glaucoma</Label>
-                            <Input {...register('lentes_aereos.glaucoma')} />
-                        </div>
+                        <FormField
+                            id="lentes_aereos_refraccion"
+                            label="Última refracción"
+                            registration={register(
+                                'lentes_aereos.ultima_refraccion',
+                            )}
+                        />
                     </div>
                 </div>
 
                 {/* Lentes de Contacto */}
-                <div className="space-y-6 pt-6 lg:pt-0 lg:pl-10">
+                <div className="space-y-6 pt-6 lg:pt-0">
                     <div className="flex flex-col justify-between gap-4 border-b pb-2 sm:flex-row sm:items-center">
-                        <h3 className="text-lg font-medium tracking-tight text-lumax-purple">
+                        <h3 className="text-lg font-semibold tracking-tight text-lumax-purple">
                             Lentes de contacto
                         </h3>
                         <div className="flex items-center gap-6">
@@ -177,31 +164,68 @@ export function AntecedentesOftalmologicosFormTab({
                     </div>
 
                     <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Última refracción</Label>
-                            <Input
-                                {...register(
-                                    'lentes_contacto.ultima_refraccion',
-                                )}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Trauma ocular</Label>
-                            <Input
-                                {...register('lentes_contacto.trauma_ocular')}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Láser</Label>
-                            <Input {...register('lentes_contacto.laser')} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Otros</Label>
-                            <Input {...register('lentes_contacto.otros')} />
-                        </div>
+                        <FormField
+                            id="lentes_contacto_refraccion"
+                            label="Última refracción"
+                            registration={register(
+                                'lentes_contacto.ultima_refraccion',
+                            )}
+                        />
                     </div>
                 </div>
             </div>
+
+            <div className="space-y-6 border-t pt-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <FormField
+                        id="cirugias_previas"
+                        label="Cirugías previas"
+                        registration={register(
+                            'lentes_aereos.cirugias_previas',
+                        )}
+                    />
+                    <FormField
+                        id="glaucoma"
+                        label="Glaucoma"
+                        registration={register('lentes_aereos.glaucoma')}
+                    />
+                    <FormField
+                        id="trauma_ocular"
+                        label="Trauma ocular"
+                        registration={register('lentes_contacto.trauma_ocular')}
+                    />
+                    <FormField
+                        id="laser"
+                        label="Láser"
+                        registration={register('lentes_contacto.laser')}
+                    />
+                    <FormField
+                        id="gotas"
+                        label="Gotas"
+                        registration={register('lentes_aereos.gotas')}
+                    />
+                    <FormField
+                        id="otros"
+                        label="Otros"
+                        registration={register('lentes_contacto.otros')}
+                    />
+                </div>
+            </div>
         </form>
+    );
+}
+
+interface FormFieldProps {
+    id: string;
+    label: string;
+    registration: UseFormRegisterReturn;
+}
+
+function FormField({ id, label, registration }: FormFieldProps) {
+    return (
+        <div className="space-y-2">
+            <Label htmlFor={id}>{label}</Label>
+            <Input id={id} {...registration} />
+        </div>
     );
 }
