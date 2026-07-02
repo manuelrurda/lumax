@@ -47,20 +47,35 @@ class PatientRefraccionFormTest extends TestCase
             'phone' => '1234567890',
             'email' => 'house@example.com',
             'refraccion' => [
-                'od_sin_quera_1' => '20/40',
-                'od_sin_quera_2' => '20/30',
-                'od_sin_quera_3' => '20/20',
-                'od_con_quera_1' => '20/20',
-                'od_con_quera_2' => '20/20',
-                'od_con_quera_3' => '20/20',
+                'od_av_sin_opt1' => '20',
+                'od_av_sin_opt2' => '40',
+                'od_av_sin_input' => 'PH 20/20',
+                'od_av_con_opt1' => '20',
+                'od_av_con_opt2' => '20',
+                'od_av_con_input' => '',
+                
+                'od_quera_1' => '44.50',
+                'od_quera_2' => '45.00',
+                'od_quera_3' => '90',
+                'od_retino_1' => '-1.50',
+                'od_retino_2' => '-0.50',
+                'od_retino_3' => '180',
+                'od_retino_4' => '',
+                
                 'od_adicion' => '+1.50',
                 'od_distancia' => '62',
-                'oi_sin_quera_1' => '20/50',
-                'oi_sin_quera_2' => '20/40',
-                'oi_sin_quera_3' => '20/30',
-                'oi_con_quera_1' => '20/25',
-                'oi_con_quera_2' => '20/20',
-                'oi_con_quera_3' => '20/20',
+                
+                'oi_av_sin_opt1' => '20',
+                'oi_av_sin_opt2' => '50',
+                'oi_av_sin_input' => '',
+                'oi_av_con_opt1' => '20',
+                'oi_av_con_opt2' => '25',
+                'oi_av_con_input' => '',
+                
+                'oi_quera_1' => '44.25',
+                'oi_quera_2' => '45.25',
+                'oi_quera_3' => '95',
+                
                 'oi_adicion' => '+1.50',
                 'oi_distancia' => '62',
                 'comentarios' => 'Paciente presenta leve mejoría con graduación temporal.',
@@ -82,7 +97,10 @@ class PatientRefraccionFormTest extends TestCase
 
         $updatedPatient = Patient::find($patient->id);
         $this->assertNotNull($updatedPatient->refraccion);
-        $this->assertEquals('20/40', $updatedPatient->refraccion['od_sin_quera_1']);
+        $this->assertEquals('20', $updatedPatient->refraccion['od_av_sin_opt1']);
+        $this->assertEquals('40', $updatedPatient->refraccion['od_av_sin_opt2']);
+        $this->assertEquals('PH 20/20', $updatedPatient->refraccion['od_av_sin_input']);
+        $this->assertEquals('44.50', $updatedPatient->refraccion['od_quera_1']);
         $this->assertEquals('+1.50', $updatedPatient->refraccion['od_adicion']);
         $this->assertEquals('Paciente presenta leve mejoría con graduación temporal.', $updatedPatient->refraccion['comentarios']);
     }

@@ -13,22 +13,67 @@ import {
     RefraccionForm,
 } from '../schemas/refraccion';
 
+function AgudezaVisualRow({
+    label,
+    namePrefix,
+    register,
+}: {
+    label: string;
+    namePrefix: 'od_av_sin' | 'od_av_con' | 'oi_av_sin' | 'oi_av_con';
+    register: UseFormRegister<RefraccionForm>;
+}) {
+    return (
+        <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <span className="font-medium text-muted-foreground sm:w-48">
+                {label}
+            </span>
+            <div className="flex items-center gap-1.5">
+                <select
+                    className="h-7 w-20 rounded-md border border-input bg-background px-2 py-0 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                    defaultValue=""
+                    {...register(`${namePrefix}_opt1`)}
+                >
+                    <option value=""></option>
+                    <option value="20">20</option>
+                </select>
+                <span className="font-semibold text-muted-foreground">/</span>
+                <select
+                    className="h-7 w-20 rounded-md border border-input bg-background px-2 py-0 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                    defaultValue=""
+                    {...register(`${namePrefix}_opt2`)}
+                >
+                    <option value=""></option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="70">70</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                </select>
+                <Input
+                    className="h-7 w-20 px-2 py-0 text-center"
+                    placeholder="Otros"
+                    {...register(`${namePrefix}_input`)}
+                />
+            </div>
+        </div>
+    );
+}
+
 function MeasurementsGroup({
-    title,
     prefix,
     register,
 }: {
-    title: string;
-    prefix: 'od_sin' | 'od_con' | 'oi_sin' | 'oi_con';
+    prefix: 'od' | 'oi';
     register: UseFormRegister<RefraccionForm>;
 }) {
     // Reusable small borderless inputs like underscores
     const blankInput = 'w-16 h-7 px-1 text-center';
 
     return (
-        <div className="mb-6 space-y-3">
-            <h4 className="text-sm font-semibold">{title}</h4>
-
+        <div className="mb-6 space-y-3 border-t pt-4">
             <div className="flex items-center space-x-2 text-sm">
                 <span className="w-28 font-medium">Queratometrias</span>
                 <Input
@@ -211,20 +256,23 @@ export function RefraccionFormTab({
                         Ojo derecho
                     </h3>
 
-                    <MeasurementsGroup
-                        title="Agudeza visual sin corrección"
-                        prefix="od_sin"
-                        register={register}
-                    />
+                    <div className="space-y-4">
+                        <AgudezaVisualRow
+                            label="Agudeza visual sin corrección"
+                            namePrefix="od_av_sin"
+                            register={register}
+                        />
+                        <AgudezaVisualRow
+                            label="Agudeza visual con corrección"
+                            namePrefix="od_av_con"
+                            register={register}
+                        />
+                    </div>
 
-                    <MeasurementsGroup
-                        title="Agudeza visual con corrección"
-                        prefix="od_con"
-                        register={register}
-                    />
+                    <MeasurementsGroup prefix="od" register={register} />
 
                     {/* Extras */}
-                    <div className="space-y-4 pt-4">
+                    <div className="space-y-4 border-t pt-4">
                         <div className="flex items-center space-x-2 text-sm">
                             <span className="w-40 font-medium">Adición</span>
                             <Input
@@ -250,20 +298,23 @@ export function RefraccionFormTab({
                         Ojo izquierdo
                     </h3>
 
-                    <MeasurementsGroup
-                        title="Agudeza visual sin corrección"
-                        prefix="oi_sin"
-                        register={register}
-                    />
+                    <div className="space-y-4">
+                        <AgudezaVisualRow
+                            label="Agudeza visual sin corrección"
+                            namePrefix="oi_av_sin"
+                            register={register}
+                        />
+                        <AgudezaVisualRow
+                            label="Agudeza visual con corrección"
+                            namePrefix="oi_av_con"
+                            register={register}
+                        />
+                    </div>
 
-                    <MeasurementsGroup
-                        title="Agudeza visual con corrección"
-                        prefix="oi_con"
-                        register={register}
-                    />
+                    <MeasurementsGroup prefix="oi" register={register} />
 
                     {/* Extras */}
-                    <div className="space-y-4 pt-4">
+                    <div className="space-y-4 border-t pt-4">
                         <div className="flex items-center space-x-2 text-sm">
                             <span className="w-40 font-medium">Adición</span>
                             <Input
