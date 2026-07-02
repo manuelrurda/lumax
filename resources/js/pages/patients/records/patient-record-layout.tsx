@@ -27,9 +27,9 @@ export function PatientRecordLayout({
             href: `/patients/${patient.id}/exploracion-fisica`,
         },
         {
-            id: 'exploracion-oftalmologica',
-            label: 'Exploración Oftalmológica',
-            href: `/patients/${patient.id}/exploracion-oftalmologica`,
+            id: 'refraccion',
+            label: 'Refracción',
+            href: `/patients/${patient.id}/refraccion`,
         },
         {
             id: 'estrabograma',

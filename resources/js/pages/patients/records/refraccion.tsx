@@ -1,14 +1,14 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { ExploracionOftalmologicaFormTab } from './forms/exploracion-oftalmologica-form';
+import { RefraccionFormTab } from './forms/refraccion-form';
 import { PatientRecordLayout } from './patient-record-layout';
-import { PatientExploracionOftalmologicaTab } from './schemas/exploracion-oftalmologica';
+import { PatientRefraccionTab } from './schemas/refraccion';
 
-export default function PatientExploracionOftalmologica({
+export default function PatientRefraccion({
     patient,
 }: {
-    patient: PatientExploracionOftalmologicaTab;
+    patient: PatientRefraccionTab;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Pacientes', href: '/patients' },
@@ -20,13 +20,13 @@ export default function PatientExploracionOftalmologica({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Exploración Oftalmológica: ${patient.first_name}`} />
+            <Head title={`Refraccción: ${patient.first_name}`} />
 
             <PatientRecordLayout
                 patient={patient}
-                currentTab="exploracion-oftalmologica"
+                currentTab="refraccion"
             >
-                <ExploracionOftalmologicaFormTab patient={patient} />
+                <RefraccionFormTab patient={patient} />
             </PatientRecordLayout>
         </AppLayout>
     );

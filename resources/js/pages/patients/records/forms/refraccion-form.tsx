@@ -6,12 +6,12 @@ import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { UseFormRegister, useForm } from 'react-hook-form';
+import { useForm, UseFormRegister } from 'react-hook-form';
 import {
-    defaultExploracionOftalmologica,
-    ExploracionOftalmologicaForm,
-    PatientExploracionOftalmologicaTab,
-} from '../schemas/exploracion-oftalmologica';
+    defaultRefraccion,
+    PatientRefraccionTab,
+    RefraccionForm,
+} from '../schemas/refraccion';
 
 function MeasurementsGroup({
     title,
@@ -20,7 +20,7 @@ function MeasurementsGroup({
 }: {
     title: string;
     prefix: 'od_sin' | 'od_con' | 'oi_sin' | 'oi_con';
-    register: UseFormRegister<ExploracionOftalmologicaForm>;
+    register: UseFormRegister<RefraccionForm>;
 }) {
     // Reusable small borderless inputs like underscores
     const blankInput = 'w-16 h-7 px-1 text-center';
@@ -119,19 +119,19 @@ function MeasurementsGroup({
     );
 }
 
-export function ExploracionOftalmologicaFormTab({
+export function RefraccionFormTab({
     patient,
 }: {
-    patient: PatientExploracionOftalmologicaTab;
+    patient: PatientRefraccionTab;
 }) {
     const [isSaving, setIsSaving] = useState(false);
 
-    const draftKey = `patient-${patient.id}-exploracion-oftalmologica`;
+    const draftKey = `patient-${patient.id}-refraccion`;
     const draftState = useDraftStore((state) => state.drafts[draftKey]);
     const setDraft = useDraftStore((state) => state.setDraft);
     const clearDraft = useDraftStore((state) => state.clearDraft);
 
-    const initialData = draftState || patient.exploracion_oftalmologica || {};
+    const initialData = draftState || patient.refraccion || {};
 
     const {
         register,
@@ -139,9 +139,9 @@ export function ExploracionOftalmologicaFormTab({
         reset,
         getValues,
         formState: { isDirty },
-    } = useForm<ExploracionOftalmologicaForm>({
+    } = useForm<RefraccionForm>({
         defaultValues: {
-            ...defaultExploracionOftalmologica,
+            ...defaultRefraccion,
             ...(initialData || {}),
         },
     });
@@ -157,13 +157,13 @@ export function ExploracionOftalmologicaFormTab({
         };
     }, [draftKey, setDraft, getValues]);
 
-    const onSubmit = (data: ExploracionOftalmologicaForm) => {
+    const onSubmit = (data: RefraccionForm) => {
         setIsSaving(true);
         router.put(
             `/patients/${patient.id}`,
             {
                 ...patient,
-                exploracion_oftalmologica: data,
+                refraccion: data,
             } as any,
             {
                 onSuccess: () => {
@@ -186,9 +186,7 @@ export function ExploracionOftalmologicaFormTab({
             className="space-y-8 rounded-xl border bg-card p-6 shadow-sm"
         >
             <div className="flex items-center justify-between border-b pb-4">
-                <h2 className="text-xl font-semibold">
-                    Exploración Oftalmológica
-                </h2>
+                <h2 className="text-xl font-semibold">Refracción</h2>
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
@@ -209,7 +207,7 @@ export function ExploracionOftalmologicaFormTab({
 
                 {/* Left Column: Ojo Derecho */}
                 <div className="space-y-6">
-                    <h3 className="mb-6 border-b pb-2 text-center text-lg font-medium tracking-tight text-lumax-purple">
+                    <h3 className="mb-6 border-b pb-2 text-center text-lg font-semibold tracking-tight text-lumax-purple">
                         Ojo derecho
                     </h3>
 
@@ -248,7 +246,7 @@ export function ExploracionOftalmologicaFormTab({
 
                 {/* Right Column: Ojo Izquierdo */}
                 <div className="space-y-6">
-                    <h3 className="mb-6 border-b pb-2 text-center text-lg font-medium tracking-tight text-lumax-purple">
+                    <h3 className="mb-6 border-b pb-2 text-center text-lg font-semibold tracking-tight text-lumax-purple">
                         Ojo izquierdo
                     </h3>
 

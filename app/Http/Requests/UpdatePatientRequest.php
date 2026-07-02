@@ -22,7 +22,7 @@ class UpdatePatientRequest extends FormRequest
             'antecedentes_oftalmologicos' => ['nullable', 'array'],
             'exploracion_fisica' => ['nullable', 'array'],
             'estrabograma' => ['nullable', 'array'],
-            'exploracion_oftalmologica' => ['nullable', 'array'],
+            'refraccion' => ['nullable', 'array'],
         ];
     }
 

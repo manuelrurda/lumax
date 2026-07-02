@@ -1,6 +1,6 @@
 import { Patient } from '@/types';
 
-export interface ExploracionOftalmologicaForm {
+export interface RefraccionForm {
     // OD (Ojo Derecho) - Sin corrección
     od_sin_quera_1: string;
     od_sin_quera_2: string;
@@ -81,7 +81,7 @@ export interface ExploracionOftalmologicaForm {
     comentarios: string;
 }
 
-export const defaultExploracionOftalmologica: ExploracionOftalmologicaForm = {
+export const defaultRefraccion: RefraccionForm = {
     od_sin_quera_1: '', od_sin_quera_2: '', od_sin_quera_3: '',
     od_sin_retino_1: '', od_sin_retino_2: '', od_sin_retino_3: '', od_sin_retino_4: '',
     od_sin_refrac_1: '', od_sin_refrac_2: '', od_sin_refrac_3: '', od_sin_refrac_4: '',
@@ -109,6 +109,6 @@ export const defaultExploracionOftalmologica: ExploracionOftalmologicaForm = {
     comentarios: '',
 };
 
-export type PatientExploracionOftalmologicaTab = Patient & {
-    exploracion_oftalmologica?: ExploracionOftalmologicaForm | null;
+export type PatientRefraccionTab = Patient & {
+    refraccion?: RefraccionForm | null;
 };
