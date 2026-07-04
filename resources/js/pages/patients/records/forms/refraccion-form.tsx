@@ -49,9 +49,7 @@ function AgudezaVisualRow({
 
     return (
         <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <span className="font-medium text-muted-foreground sm:w-48">
-                {label}
-            </span>
+            <span className="font-medium sm:w-48">{label}</span>
             <div className="flex items-center gap-1.5">
                 <select
                     className="h-7 w-36 rounded-md border border-input bg-background px-2 py-0 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
@@ -63,8 +61,12 @@ function AgudezaVisualRow({
                         setValue(`${namePrefix}_opt2`, '');
 
                         // Sync counterpart unit
-                        setValue(`${counterpartPrefix}_opt1`, newVal, { shouldDirty: true });
-                        setValue(`${counterpartPrefix}_opt2`, '', { shouldDirty: true });
+                        setValue(`${counterpartPrefix}_opt1`, newVal, {
+                            shouldDirty: true,
+                        });
+                        setValue(`${counterpartPrefix}_opt2`, '', {
+                            shouldDirty: true,
+                        });
                     }}
                 >
                     <option value="">Unidad</option>
