@@ -78,6 +78,34 @@ class PatientsController extends Controller
     }
 
     /**
+     * Display the specified patient history timeline.
+     */
+    public function history(Request $request, $id): Response
+    {
+        $patient = Patient::where('user_id', $request->user()->id)
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
+            ->findOrFail($id);
+
+        $query = \Spatie\Activitylog\Models\Activity::where('subject_type', Patient::class)
+            ->where('subject_id', $id)
+            ->latest();
+
+        if (!$request->boolean('show_all')) {
+            $activities = $query->get()->unique(function ($item) {
+                return $item->created_at->format('Y-m-d');
+            })->values();
+        } else {
+            $activities = $query->get();
+        }
+
+        return Inertia::render('patients/history/index', [
+            'patient' => $patient,
+            'records' => $activities,
+            'showAll' => $request->boolean('show_all'),
+        ]);
+    }
+
+    /**
      * Display the specified patient.
      */
     public function antecedentes(Request $request, $id): Response

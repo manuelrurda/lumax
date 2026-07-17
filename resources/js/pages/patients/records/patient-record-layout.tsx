@@ -15,7 +15,7 @@ export function PatientRecordLayout({
     children,
 }: PatientRecordLayoutProps) {
     const tabs = [
-        { id: 'info', label: 'Antecedentes', href: `/patients/${patient.id}` },
+        { id: 'info', label: 'Antecedentes', href: `/patients/${patient.id}/antecedentes` },
         {
             id: 'oftalmologicos',
             label: 'Antecedentes Oftalmológicos',
