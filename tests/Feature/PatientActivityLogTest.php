@@ -51,6 +51,8 @@ class PatientActivityLogTest extends TestCase
             'refraccion' => ['test' => 'data'],
         ]);
 
+        // Spatie logs the 'created' event if logOnlyDirty is off and we don't have logOnlyDirty. 
+        // We clear everything out first.
         Activity::truncate();
 
         // Update a non-tracked field
@@ -58,7 +60,9 @@ class PatientActivityLogTest extends TestCase
             'first_name' => 'Jane',
         ]);
 
-        // As per our LogOptions only JSON fields are tracked
+        // With logOnlyDirty removed, Spatie logs every time an updated event happens if we don't strictly filter it.
+        // Wait, dontLogEmptyChanges() should prevent it if the tracked fields are identical.
+        // Let's assert it correctly.
         $this->assertDatabaseCount('activity_log', 0);
     }
 }

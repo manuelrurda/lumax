@@ -162,9 +162,8 @@ export default function PatientHistoryPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    disabled
-                                                    className="opacity-50"
-                                                    title="Próximamente: ver registro en modo solo lectura"
+                                                    onClick={() => router.get(`/patients/${patient.id}/antecedentes`, { activity_id: record.id })}
+                                                    title="Ver registro en modo solo lectura"
                                                 >
                                                     <Eye className="mr-2 h-4 w-4" />
                                                     Ver Detalle

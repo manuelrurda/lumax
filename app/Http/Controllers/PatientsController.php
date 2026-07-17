@@ -106,13 +106,56 @@ class PatientsController extends Controller
     }
 
     /**
+     * Helper to fetch patient and optionally apply a historical snapshot
+     */
+    private function getPatientData(Request $request, $id, array $selects = [])
+    {
+        $query = Patient::where('user_id', $request->user()->id);
+        if (!empty($selects)) {
+            $query->select($selects);
+        }
+        $patient = $query->findOrFail($id);
+
+        $activityId = $request->query('activity_id');
+        
+        if ($activityId) {
+            $activity = \Spatie\Activitylog\Models\Activity::where('subject_type', Patient::class)
+                ->where('subject_id', $id)
+                ->findOrFail($activityId);
+                
+            $snapshot = $activity->properties->get('snapshot', []);
+            if (!empty($snapshot)) {
+                $patient->antecedentes = $snapshot['antecedentes'] ?? null;
+                $patient->antecedentes_oftalmologicos = $snapshot['antecedentes_oftalmologicos'] ?? null;
+                $patient->exploracion_fisica = $snapshot['exploracion_fisica'] ?? null;
+                $patient->estrabograma = $snapshot['estrabograma'] ?? null;
+                $patient->refraccion = $snapshot['refraccion'] ?? null;
+            } else {
+                $changes = $activity->attribute_changes;
+                $attributes = $changes['attributes'] ?? [];
+                foreach($attributes as $key => $val) {
+                    $patient->{$key} = $val;
+                }
+            }
+            
+            Inertia::share([
+                'isHistoryView' => true,
+                'activityId' => $activityId,
+                'historyDate' => $activity->created_at->toISOString(),
+            ]);
+        } else {
+            Inertia::share('isHistoryView', false);
+        }
+
+        return $patient;
+    }
+
+    /**
      * Display the specified patient.
      */
     public function antecedentes(Request $request, $id): Response
     {
-        $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes', 'updated_at')
-            ->findOrFail($id);
+        $patient = $this->getPatientData($request, $id, ['id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes', 'updated_at']);
 
         return Inertia::render('patients/records/antecedentes', [
             'patient' => $patient,
@@ -124,9 +167,7 @@ class PatientsController extends Controller
      */
     public function oftalmologicos(Request $request, $id): Response
     {
-        $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes_oftalmologicos', 'updated_at')
-            ->findOrFail($id);
+        $patient = $this->getPatientData($request, $id, ['id', 'first_name', 'last_name', 'email', 'phone', 'antecedentes_oftalmologicos', 'updated_at']);
 
         return Inertia::render('patients/records/oftalmologicos', [
             'patient' => $patient,
@@ -138,9 +179,7 @@ class PatientsController extends Controller
      */
     public function exploracionFisica(Request $request, $id): Response
     {
-        $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'exploracion_fisica', 'updated_at')
-            ->findOrFail($id);
+        $patient = $this->getPatientData($request, $id, ['id', 'first_name', 'last_name', 'email', 'phone', 'exploracion_fisica', 'updated_at']);
 
         return Inertia::render('patients/records/exploracion-fisica', [
             'patient' => $patient,
@@ -152,9 +191,7 @@ class PatientsController extends Controller
      */
     public function estrabograma(Request $request, $id): Response
     {
-        $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'estrabograma', 'updated_at')
-            ->findOrFail($id);
+        $patient = $this->getPatientData($request, $id, ['id', 'first_name', 'last_name', 'email', 'phone', 'estrabograma', 'updated_at']);
 
         return Inertia::render('patients/records/estrabograma', [
             'patient' => $patient,
@@ -166,9 +203,7 @@ class PatientsController extends Controller
      */
     public function refraccion(Request $request, $id): Response
     {
-        $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'refraccion', 'updated_at')
-            ->findOrFail($id);
+        $patient = $this->getPatientData($request, $id, ['id', 'first_name', 'last_name', 'email', 'phone', 'refraccion', 'updated_at']);
 
         return Inertia::render('patients/records/refraccion', [
             'patient' => $patient,
@@ -180,9 +215,7 @@ class PatientsController extends Controller
      */
     public function anguloIridocorneal(Request $request, $id): Response
     {
-        $patient = Patient::where('user_id', $request->user()->id)
-            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
-            ->findOrFail($id);
+        $patient = $this->getPatientData($request, $id, ['id', 'first_name', 'last_name', 'email', 'phone', 'updated_at']);
 
         return Inertia::render('patients/records/angulo-iridocorneal', [
             'patient' => $patient,
