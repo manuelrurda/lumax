@@ -1,6 +1,5 @@
+import ImageCanvas from '@/components/canvas/image-canvas';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
 import { LoaderCircle, Save } from 'lucide-react';
@@ -11,10 +10,6 @@ import {
     EstrabogramaForm,
     PatientEstrabogramaTab,
 } from '../schemas/estrabograma';
-
-// Shared style for all diagram input lines
-const lineInput =
-    'absolute text-center bg-white focus:border-foreground focus:ring-0 px-1 text-sm h-7';
 
 export function EstrabogramaFormTab({
     patient,
@@ -31,7 +26,6 @@ export function EstrabogramaFormTab({
     const initialData = draftState || patient.estrabograma || {};
 
     const {
-        register,
         handleSubmit,
         reset,
         getValues,
@@ -66,7 +60,6 @@ export function EstrabogramaFormTab({
                 onSuccess: () => {
                     setIsSaving(false);
                     clearDraft(draftKey);
-                    // Update default values to new ones, thus clearing isDirty
                     reset({}, { keepValues: true });
                 },
                 onError: () => setIsSaving(false),
@@ -76,15 +69,14 @@ export function EstrabogramaFormTab({
     };
 
     return (
-        <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-6 rounded-xl border bg-card p-6 shadow-sm"
-        >
+        <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between border-b pb-4">
-                <h2 className="text-xl font-semibold">Estrabograma</h2>
+                <h2 className="text-xl font-semibold">
+                    Estrabograma (Canvas Test)
+                </h2>
                 <Button
-                    type="submit"
+                    onClick={handleSubmit(onSubmit)}
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
                     disabled={(!isDirty && !draftState) || isSaving}
                 >
@@ -97,13 +89,22 @@ export function EstrabogramaFormTab({
                 </Button>
             </div>
 
-            {/* Diagram — 718×535 coordinate space matching the SVG */}
+            {/* Test Image Canvas Component */}
+            <div className="h-[600px] w-full overflow-hidden rounded-xl border">
+                <ImageCanvas
+                    backgroundImageUrl="/estrabograma2.svg"
+                    className="h-full w-full"
+                />
+            </div>
+
+            {/*
+            ORIGINAL FORM COMMENTED OUT FOR TESTING:
+            
             <div className="overflow-x-auto">
                 <div
                     className="relative mx-auto"
                     style={{ width: 718, height: 435 }}
                 >
-                    {/* Background SVG image */}
                     <img
                         src="/estrabograma.svg"
                         alt="Estrabograma diagram"
@@ -112,160 +113,15 @@ export function EstrabogramaFormTab({
                         draggable={false}
                     />
 
-                    {/* ── Inputs overlaid on SVG coordinate space ── */}
-                    {/* Top-left box */}
                     <Input
                         {...register('campo_1')}
                         className={lineInput}
                         style={{ top: 40, left: 235, width: 70 }}
                     />
-                    <Input
-                        {...register('campo_2')}
-                        className={lineInput}
-                        style={{ top: 130, left: 35, width: 70 }}
-                    />
-
-                    {/* Top-right box */}
-                    <Input
-                        {...register('campo_3')}
-                        className={lineInput}
-                        style={{ top: 40, left: 411, width: 70 }}
-                    />
-                    <Input
-                        {...register('campo_4')}
-                        className={lineInput}
-                        style={{ top: 130, left: 613, width: 70 }}
-                    />
-
-                    {/* Three inputs on top of left triangle */}
-                    <Input
-                        {...register('campo_5')}
-                        className={lineInput}
-                        style={{ top: 170, left: 160, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_6')}
-                        className={lineInput}
-                        style={{ top: 170, left: 220, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_7')}
-                        className={lineInput}
-                        style={{ top: 170, left: 280, width: 52 }}
-                    />
-
-                    {/* Three inputs on top of right triangle */}
-                    <Input
-                        {...register('campo_8')}
-                        className={lineInput}
-                        style={{ top: 170, left: 385, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_9')}
-                        className={lineInput}
-                        style={{ top: 170, left: 445, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_10')}
-                        className={lineInput}
-                        style={{ top: 170, left: 505, width: 52 }}
-                    />
-
-                    {/* Three inputs on the middle of left triangle */}
-                    <Input
-                        {...register('campo_11')}
-                        className={lineInput}
-                        style={{ top: 290, left: 90, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_12')}
-                        className={lineInput}
-                        style={{ top: 290, left: 190, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_13')}
-                        className={lineInput}
-                        style={{ top: 290, left: 280, width: 52 }}
-                    />
-
-                    {/* Three inputs on the middle of right triangle */}
-                    <Input
-                        {...register('campo_14')}
-                        className={lineInput}
-                        style={{ top: 290, left: 385, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_15')}
-                        className={lineInput}
-                        style={{ top: 290, left: 475, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_16')}
-                        className={lineInput}
-                        style={{ top: 290, left: 575, width: 52 }}
-                    />
-
-                    {/* Three inputs on the bottom of left triangle */}
-                    <Input
-                        {...register('campo_17')}
-                        className={lineInput}
-                        style={{ top: 400, left: 160, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_18')}
-                        className={lineInput}
-                        style={{ top: 400, left: 220, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_19')}
-                        className={lineInput}
-                        style={{ top: 400, left: 280, width: 52 }}
-                    />
-
-                    {/* Three inputs on the bottom of right triangle */}
-                    <Input
-                        {...register('campo_20')}
-                        className={lineInput}
-                        style={{ top: 400, left: 385, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_21')}
-                        className={lineInput}
-                        style={{ top: 400, left: 445, width: 52 }}
-                    />
-                    <Input
-                        {...register('campo_22')}
-                        className={lineInput}
-                        style={{ top: 400, left: 505, width: 52 }}
-                    />
-
-                    {/* Two wide inputs between triangles */}
-                    <Input
-                        {...register('campo_23')}
-                        className={lineInput}
-                        style={{ top: 240, left: 285, width: 150 }}
-                    />
-                    <Input
-                        {...register('campo_24')}
-                        className={lineInput}
-                        style={{ top: 340, left: 285, width: 150 }}
-                    />
-
-                    {/* Two wide inputs outside the triangles */}
-                    <Input
-                        {...register('campo_25')}
-                        className={lineInput}
-                        style={{ top: 340, width: 150 }}
-                    />
-                    <Input
-                        {...register('campo_26')}
-                        className={lineInput}
-                        style={{ top: 340, left: 570, width: 150 }}
-                    />
+                    ...
                 </div>
             </div>
 
-            {/* Observaciones */}
             <div className="space-y-2">
                 <label className="text-sm font-medium">Observaciones</label>
                 <Textarea
@@ -274,6 +130,7 @@ export function EstrabogramaFormTab({
                     className="min-h-[80px]"
                 />
             </div>
-        </form>
+            */}
+        </div>
     );
 }

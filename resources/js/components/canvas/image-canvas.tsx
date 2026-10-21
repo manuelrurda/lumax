@@ -28,7 +28,7 @@ export default function ImageCanvas({
 
     // Drawing state
     const [tool, setTool] = useState('select');
-    const [color, setColor] = useState('#ef4444');
+    const [color, setColor] = useState('#1e293b');
 
     // History State for Undo/Redo
     const [history, setHistory] = useState<any[][]>([[]]);
@@ -270,6 +270,9 @@ export default function ImageCanvas({
         const pos = stage.getRelativePointerPosition();
         if (!pos) return;
 
+        // Check for Cmd key (metaKey), Shift key, or Ctrl key
+        const isStraight = e.evt.metaKey || e.evt.shiftKey || e.evt.ctrlKey;
+
         // Update the last shape's end point in the CURRENT step
         setHistory((prevHistory) => {
             const newHistory = [...prevHistory];
@@ -278,11 +281,29 @@ export default function ImageCanvas({
             if (currentShapes.length === 0) return prevHistory;
 
             const lastShape = { ...currentShapes[currentShapes.length - 1] };
+            let endX = pos.x;
+            let endY = pos.y;
+
+            if (isStraight && lastShape.points) {
+                const startX = lastShape.points[0];
+                const startY = lastShape.points[1];
+                const dx = pos.x - startX;
+                const dy = pos.y - startY;
+
+                const angle = Math.atan2(dy, dx);
+                // Snap angle to nearest 45 degrees (PI / 4 radians)
+                const snapAngle = Math.round(angle / (Math.PI / 4)) * (Math.PI / 4);
+                const distance = Math.hypot(dx, dy);
+
+                endX = startX + distance * Math.cos(snapAngle);
+                endY = startY + distance * Math.sin(snapAngle);
+            }
+
             lastShape.points = [
                 lastShape.points[0],
                 lastShape.points[1],
-                pos.x,
-                pos.y,
+                endX,
+                endY,
             ];
 
             currentShapes[currentShapes.length - 1] = lastShape;
@@ -352,7 +373,7 @@ export default function ImageCanvas({
                         draggable={tool === 'select' && editingTextIndex === null} // Only allow panning when in select mode and not editing text
                         dragBoundFunc={(pos) => clampPosition(pos, scale)}
                         onDragEnd={(e) => {
-                            if (tool === 'select') {
+                            if (e.target === e.target.getStage() && tool === 'select') {
                                 setPosition({
                                     x: e.target.x(),
                                     y: e.target.y(),
@@ -395,9 +416,29 @@ export default function ImageCanvas({
                                             x={shape.x}
                                             y={shape.y}
                                             text={shape.text}
-                                            fill={shape.color || "#ef4444"}
+                                            fill={shape.color || "#1e293b"}
                                             fontSize={24 / scale}
                                             fontFamily="Inter, sans-serif"
+                                            draggable={tool === 'select'}
+                                            onDragStart={(e) => {
+                                                e.cancelBubble = true;
+                                            }}
+                                            onDragEnd={(e) => {
+                                                e.cancelBubble = true;
+                                                const newX = e.target.x();
+                                                const newY = e.target.y();
+                                                setHistory((prevHistory) => {
+                                                    const newHistory = [...prevHistory];
+                                                    const currentShapes = [...newHistory[step]];
+                                                    currentShapes[i] = {
+                                                        ...currentShapes[i],
+                                                        x: newX,
+                                                        y: newY,
+                                                    };
+                                                    newHistory[step] = currentShapes;
+                                                    return newHistory;
+                                                });
+                                            }}
                                             onDblClick={() => handleTextDblClick(i)}
                                             onDblTap={() => handleTextDblClick(i)}
                                         />
