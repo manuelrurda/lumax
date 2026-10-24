@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
+import type { FormDataConvertible } from '@inertiajs/core';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm, UseFormRegisterReturn } from 'react-hook-form';
@@ -21,7 +22,7 @@ export function AntecedentesOftalmologicosFormTab({
     const [isSaving, setIsSaving] = useState(false);
 
     const draftKey = `patient-${patient.id}-oftalmologicos`;
-    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const draftState = useDraftStore((state) => state.getDraft<AntecedentesOftalmologicosForm>(draftKey));
     const setDraft = useDraftStore((state) => state.setDraft);
     const clearDraft = useDraftStore((state) => state.clearDraft);
 
@@ -58,10 +59,10 @@ export function AntecedentesOftalmologicosFormTab({
 
         router.put(
             `/patients/${patient.id}`,
-            {
-                ...patient,
-                antecedentes_oftalmologicos: data,
-            } as any,
+            { ...patient, antecedentes_oftalmologicos: data } as unknown as Record<
+                string,
+                FormDataConvertible
+            >,
             {
                 onSuccess: () => {
                     setIsSaving(false);

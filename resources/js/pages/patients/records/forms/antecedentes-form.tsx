@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
+import type { FormDataConvertible } from '@inertiajs/core';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -25,11 +26,13 @@ export function AntecedentesTab({
     const [isSaving, setIsSaving] = useState(false);
 
     const draftKey = `patient-${patient.id}-antecedentes`;
-    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const draftState = useDraftStore((state) => state.getDraft<AntecedentesForm>(draftKey));
     const setDraft = useDraftStore((state) => state.setDraft);
     const clearDraft = useDraftStore((state) => state.clearDraft);
 
-    const initialData = draftState || patient.antecedentes || {};
+    const initialData = (draftState ||
+        patient.antecedentes ||
+        {}) as AntecedentesForm;
 
     const {
         register,
@@ -76,10 +79,10 @@ export function AntecedentesTab({
 
         router.put(
             `/patients/${patient.id}`,
-            {
-                ...patient,
-                antecedentes: data,
-            } as any,
+            { ...patient, antecedentes: data } as unknown as Record<
+                string,
+                FormDataConvertible
+            >,
             {
                 onSuccess: () => {
                     setIsSaving(false);

@@ -1,4 +1,4 @@
-import { MousePointer2, Minus, ArrowUpRight, Type, Undo2, Redo2 } from "lucide-react";
+import { MousePointer2, Minus, ArrowUpRight, Type, Undo2, Redo2, type LucideIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
@@ -30,7 +30,7 @@ export const Toolbar = ({ tool, setTool, color, setColor, onUndo, onRedo, canUnd
         onClick, 
         disabled 
     }: { 
-        icon: any, 
+        icon: LucideIcon, 
         label: string, 
         isActive?: boolean, 
         onClick?: () => void, 
