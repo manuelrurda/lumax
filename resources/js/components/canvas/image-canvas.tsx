@@ -5,6 +5,15 @@ import useImage from 'use-image';
 import { Toolbar } from './toolbar';
 import { ZoomControls } from './zoom-controls';
 
+export interface CanvasShape {
+    type: string;
+    points?: number[];
+    x?: number;
+    y?: number;
+    text?: string;
+    color?: string;
+}
+
 interface ImageCanvasProps {
     backgroundImageUrl: string;
     className?: string;
@@ -31,7 +40,7 @@ export default function ImageCanvas({
     const [color, setColor] = useState('#1e293b');
 
     // History State for Undo/Redo
-    const [history, setHistory] = useState<any[][]>([[]]);
+    const [history, setHistory] = useState<CanvasShape[][]>([[]]);
     const [step, setStep] = useState(0);
     const isDrawing = useRef(false);
     
@@ -83,7 +92,7 @@ export default function ImageCanvas({
     useEffect(() => {
         if (!containerRef.current) return;
         const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 setDimensions({
                     width: entry.contentRect.width,
                     height: entry.contentRect.height,
@@ -300,8 +309,8 @@ export default function ImageCanvas({
             }
 
             lastShape.points = [
-                lastShape.points[0],
-                lastShape.points[1],
+                lastShape.points?.[0] ?? 0,
+                lastShape.points?.[1] ?? 0,
                 endX,
                 endY,
             ];
@@ -449,7 +458,7 @@ export default function ImageCanvas({
                                     return (
                                         <Arrow
                                             key={i}
-                                            points={shape.points}
+                                            points={shape.points ?? []}
                                             stroke={shape.color || "#ef4444"}
                                             fill={shape.color || "#ef4444"}
                                             strokeWidth={4 / scale}
@@ -465,7 +474,7 @@ export default function ImageCanvas({
                                 return (
                                     <Line
                                         key={i}
-                                        points={shape.points}
+                                        points={shape.points ?? []}
                                         stroke={shape.color || "#ef4444"}
                                         strokeWidth={4 / scale}
                                         tension={0.5}
@@ -483,8 +492,8 @@ export default function ImageCanvas({
                             autoFocus
                             className="absolute bg-transparent outline-hidden border border-dashed border-slate-400 p-0 m-0 z-20"
                             style={{
-                                top: shapes[editingTextIndex].y * scale + position.y,
-                                left: shapes[editingTextIndex].x * scale + position.x,
+                                top: (shapes[editingTextIndex].y ?? 0) * scale + position.y,
+                                left: (shapes[editingTextIndex].x ?? 0) * scale + position.x,
                                 color: shapes[editingTextIndex].color,
                                 fontSize: `${24}px`, // visual size on screen is fixed at 24px (24/scale * scale)
                                 fontFamily: "Inter, sans-serif",
@@ -508,7 +517,7 @@ export default function ImageCanvas({
                             }}
                             onBlur={() => {
                                 // If the text is empty on blur, remove the shape entirely from this step
-                                if (!shapes[editingTextIndex].text.trim()) {
+                                if (!shapes[editingTextIndex].text?.trim()) {
                                     setHistory(prev => {
                                         const newHistory = [...prev];
                                         const currentShapes = [...newHistory[step]];
