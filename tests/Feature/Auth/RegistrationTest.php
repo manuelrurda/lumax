@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -62,6 +63,7 @@ test('registration fails on duplicate email', function () {
     $response = $this->post(route('register.store'), $userData);
     $response->assertInvalid('email');
 });
+
 test('registration fails on a malformed RFC with the right length', function () {
     // 13 characters, so it passes the old size:13 check, but the structure
     // and check digit are invalid, so ValidRfc must reject it.
@@ -90,4 +92,33 @@ test('registration fails on an RFC with a wrong check digit', function () {
     ]);
 
     $response->assertInvalid('rfc');
+});
+
+test('registration does not write the plaintext password to the log', function () {
+    $logged = [];
+
+    Log::listen(function ($event) use (&$logged) {
+        $logged[] = (string) $event->message;
+
+        foreach ((array) $event->context as $key => $value) {
+            $logged[] = $key.'='.json_encode($value);
+        }
+    });
+
+    $secret = 'super-secret-password-123';
+
+    $response = $this->post(route('register.store'), [
+        'first_name' => 'Log',
+        'last_name' => 'Safety',
+        'rfc' => 'ABCD123456EF7',
+        'email' => 'log.safety@example.com',
+        'password' => $secret,
+        'password_confirmation' => $secret,
+    ]);
+
+    $response->assertRedirect(route('patients', absolute: false));
+
+    foreach ($logged as $entry) {
+        expect($entry)->not->toContain($secret);
+    }
 });
