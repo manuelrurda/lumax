@@ -43,7 +43,7 @@ export function AntecedentesPatologicosForm({ register, control, watch }: FormSe
                             <Label className="text-xs text-muted-foreground">¿Padece?</Label>
                             <Controller
                                 control={control}
-                                name={`antecedentes_patologicos.${key as any}.padece` as any}
+                                name={`antecedentes_patologicos.${key}.padece`}
                                 render={({ field }) => (
                                     <RadioGroup
                                         onValueChange={field.onChange}
@@ -65,7 +65,7 @@ export function AntecedentesPatologicosForm({ register, control, watch }: FormSe
                         <div className="flex-1 basis-[45%] space-y-2">
                             <Label className="text-xs text-muted-foreground">Tiempo de evolución</Label>
                             <Input
-                                {...register(`antecedentes_patologicos.${key as any}.tiempo_evolucion` as any)}
+                                {...register(`antecedentes_patologicos.${key}.tiempo_evolucion`)}
                                 placeholder="Ej. 2 años"
                                 className="bg-white"
                             />

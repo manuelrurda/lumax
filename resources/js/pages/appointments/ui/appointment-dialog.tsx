@@ -31,13 +31,6 @@ interface AppointmentDialogProps {
     onDelete?: (id: number) => void;
 }
 
-// Temporary mocked patients
-const mockPatients = [
-    { id: 1, name: 'Juan Pérez' },
-    { id: 2, name: 'María García' },
-    { id: 3, name: 'Carlos López' },
-];
-
 export function AppointmentDialog({
     open,
     onOpenChange,
@@ -58,7 +51,9 @@ export function AppointmentDialog({
 
     const [patientSearch, setPatientSearch] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
-    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [searchResults, setSearchResults] = useState<
+        { id: number; first_name: string; last_name: string }[]
+    >([]);
     const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
