@@ -25,8 +25,8 @@ interface ActivityLog {
     event: string;
     created_at: string;
     attribute_changes?: {
-        attributes?: Record<string, any>;
-        old?: Record<string, any>;
+        attributes?: Record<string, unknown>;
+        old?: Record<string, unknown>;
     };
 }
 

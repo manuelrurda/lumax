@@ -42,7 +42,7 @@ export function AntecedentesHeredofamiliaresForm({ register, control, watch }: F
                             <Label className="text-xs text-muted-foreground">¿Padece un familiar?</Label>
                             <Controller
                                 control={control}
-                                name={`antecedentes_heredofamiliares.${key as any}.padece` as any}
+                                name={`antecedentes_heredofamiliares.${key}.padece`}
                                 render={({ field }) => (
                                     <RadioGroup
                                         onValueChange={field.onChange}
@@ -64,7 +64,7 @@ export function AntecedentesHeredofamiliaresForm({ register, control, watch }: F
                         <div className="flex-1 basis-[45%] space-y-2">
                             <Label className="text-xs text-muted-foreground">Parentesco</Label>
                             <Input
-                                {...register(`antecedentes_heredofamiliares.${key as any}.parentesco` as any)}
+                                {...register(`antecedentes_heredofamiliares.${key}.parentesco`)}
                                 placeholder="Ej. Madre, Abuelo"
                                 className="bg-white"
                             />
