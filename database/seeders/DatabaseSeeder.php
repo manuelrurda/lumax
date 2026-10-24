@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             [
                 'first_name' => 'Test',
                 'last_name' => 'User',
-                'rfc' => 'ROUM010315B27',
+                'rfc' => 'PRUE010101AB7',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             [
                 'first_name' => 'Gregory',
                 'last_name' => 'House',
-                'rfc' => 'HOUS590611X1A',
+                'rfc' => 'DEMO020202CD8',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             [
                 'first_name' => 'Stephen',
                 'last_name' => 'Strange',
-                'rfc' => 'STRS301111MAG',
+                'rfc' => 'FICT030303EFA',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
