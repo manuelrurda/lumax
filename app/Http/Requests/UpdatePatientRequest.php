@@ -14,8 +14,11 @@ class UpdatePatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            // Names are only required when present: clinical-section saves
+            // (one PUT per record tab) must not have to resend the whole
+            // patient just to satisfy identity validation.
+            'first_name' => ['sometimes', 'required', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'regex:/^[0-9]+$/', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
             'antecedentes' => ['nullable', 'array'],

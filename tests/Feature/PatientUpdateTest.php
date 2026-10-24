@@ -87,6 +87,49 @@ class PatientUpdateTest extends TestCase
         ]);
     }
     
+    public function test_section_only_update_without_names_succeeds(): void
+    {
+        $user = User::factory()->create();
+        $patient = Patient::create([
+            'user_id' => $user->id,
+            'first_name' => 'Original First',
+            'last_name' => 'Original Last',
+        ]);
+
+        $response = $this->actingAs($user)->from("/patients/{$patient->id}/refraccion")->put("/patients/{$patient->id}", [
+            'refraccion' => ['od_esfera' => '-1.25', 'oi_esfera' => '-1.00'],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('message', 'Paciente actualizado exitosamente.');
+
+        $patient->refresh();
+        $this->assertSame('Original First', $patient->first_name);
+        $this->assertSame('Original Last', $patient->last_name);
+        $this->assertSame('-1.25', $patient->refraccion['od_esfera']);
+    }
+
+    public function test_update_with_explicitly_empty_first_name_still_fails(): void
+    {
+        $user = User::factory()->create();
+        $patient = Patient::create([
+            'user_id' => $user->id,
+            'first_name' => 'Original First',
+            'last_name' => 'Original Last',
+        ]);
+
+        $response = $this->actingAs($user)->put("/patients/{$patient->id}", [
+            'first_name' => '',
+        ]);
+
+        $response->assertSessionHasErrors(['first_name']);
+
+        $this->assertDatabaseHas('patients', [
+            'id' => $patient->id,
+            'first_name' => 'Original First',
+        ]);
+    }
+
     public function test_unauthenticated_user_cannot_update_patient(): void
     {
         $user = User::factory()->create();
