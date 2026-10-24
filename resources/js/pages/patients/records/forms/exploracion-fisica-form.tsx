@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
+import type { FormDataConvertible } from '@inertiajs/core';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,7 +22,7 @@ export function ExploracionFisicaFormTab({
     const [isSaving, setIsSaving] = useState(false);
 
     const draftKey = `patient-${patient.id}-exploracion-fisica`;
-    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const draftState = useDraftStore((state) => state.getDraft<ExploracionFisicaForm>(draftKey));
     const setDraft = useDraftStore((state) => state.setDraft);
     const clearDraft = useDraftStore((state) => state.clearDraft);
 
@@ -55,10 +56,10 @@ export function ExploracionFisicaFormTab({
         setIsSaving(true);
         router.put(
             `/patients/${patient.id}`,
-            {
-                ...patient,
-                exploracion_fisica: data,
-            } as any,
+            { ...patient, exploracion_fisica: data } as unknown as Record<
+                string,
+                FormDataConvertible
+            >,
             {
                 onSuccess: () => {
                     setIsSaving(false);

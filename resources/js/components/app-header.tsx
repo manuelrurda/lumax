@@ -35,13 +35,6 @@ import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const defaultBreadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Patients',
-        href: patients(),
-    },
-];
-
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
