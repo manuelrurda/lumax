@@ -17,11 +17,27 @@ export interface CanvasShape {
 interface ImageCanvasProps {
     backgroundImageUrl: string;
     className?: string;
+    /**
+     * Shapes to render when the canvas first mounts (issue #5). Read once:
+     * afterwards the canvas owns the drawing state (including undo/redo
+     * history) and reports every change through onChange.
+     */
+    initialShapes?: CanvasShape[];
+    /** Called with the full, JSON-safe shape list whenever it changes. */
+    onChange?: (shapes: CanvasShape[]) => void;
+    /**
+     * Read-only rendering (e.g. historical snapshot views): no drawing,
+     * no text editing, no toolbar. Pan/zoom controls stay available.
+     */
+    readOnly?: boolean;
 }
 
 export default function ImageCanvas({
     backgroundImageUrl,
     className = '',
+    initialShapes,
+    onChange,
+    readOnly = false,
 }: ImageCanvasProps) {
     const [image] = useImage(backgroundImageUrl);
 
@@ -40,15 +56,28 @@ export default function ImageCanvas({
     const [color, setColor] = useState('#1e293b');
 
     // History State for Undo/Redo
-    const [history, setHistory] = useState<CanvasShape[][]>([[]]);
+    const [history, setHistory] = useState<CanvasShape[][]>(() => [
+        initialShapes ?? [],
+    ]);
     const [step, setStep] = useState(0);
     const isDrawing = useRef(false);
-    
+
+    // Report shape changes to the parent (controlled persistence, #5).
+    // A ref keeps the latest callback without re-running on re-renders.
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
     // Text editing state
     const [editingTextIndex, setEditingTextIndex] = useState<number | null>(null);
 
     // Derived current shapes
     const shapes = history[step];
+
+    useEffect(() => {
+        if (!readOnly) {
+            onChangeRef.current?.(shapes);
+        }
+    }, [shapes, readOnly]);
 
     // Undo / Redo Handlers
     const handleUndo = () => {
@@ -72,6 +101,7 @@ export default function ImageCanvas({
     // Keyboard shortcuts for Undo/Redo
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (readOnly) return;
             // Don't trigger undo/redo if typing in an input
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
                 return;
@@ -249,6 +279,7 @@ export default function ImageCanvas({
 
     // Drawing Handlers
     const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
+        if (readOnly) return;
         // If clicking on an empty area while editing text, blur handles closing it.
         // We only start a new action if not clicking the stage while another thing is active.
         if (tool !== 'line' && tool !== 'arrow') return;
@@ -327,6 +358,7 @@ export default function ImageCanvas({
     
     // Handle text creation on click to avoid mouseup focus stealing
     const handleClick = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
+        if (readOnly) return;
         if (tool === 'text' && editingTextIndex === null) {
             const stage = e.target.getStage();
             if (!stage) return;
@@ -349,6 +381,7 @@ export default function ImageCanvas({
     
     // Double click to edit existing text
     const handleTextDblClick = (index: number) => {
+        if (readOnly) return;
         if (tool === 'select' || tool === 'text') {
             setTimeout(() => {
                 setEditingTextIndex(index);
@@ -379,7 +412,7 @@ export default function ImageCanvas({
                         x={position.x}
                         y={position.y}
                         onWheel={handleWheel}
-                        draggable={tool === 'select' && editingTextIndex === null} // Only allow panning when in select mode and not editing text
+                        draggable={tool === 'select' && editingTextIndex === null && !readOnly} // Only allow panning when in select mode and not editing text
                         dragBoundFunc={(pos) => clampPosition(pos, scale)}
                         onDragEnd={(e) => {
                             if (e.target === e.target.getStage() && tool === 'select') {
@@ -428,7 +461,7 @@ export default function ImageCanvas({
                                             fill={shape.color || "#1e293b"}
                                             fontSize={24 / scale}
                                             fontFamily="Inter, sans-serif"
-                                            draggable={tool === 'select'}
+                                            draggable={tool === 'select' && !readOnly}
                                             onDragStart={(e) => {
                                                 e.cancelBubble = true;
                                             }}
@@ -537,16 +570,18 @@ export default function ImageCanvas({
                         />
                     )}
 
-                    <Toolbar
-                        tool={tool}
-                        setTool={setTool}
-                        color={color}
-                        setColor={setColor}
-                        onUndo={handleUndo}
-                        onRedo={handleRedo}
-                        canUndo={step > 0}
-                        canRedo={step < history.length - 1}
-                    />
+                    {!readOnly && (
+                        <Toolbar
+                            tool={tool}
+                            setTool={setTool}
+                            color={color}
+                            setColor={setColor}
+                            onUndo={handleUndo}
+                            onRedo={handleRedo}
+                            canUndo={step > 0}
+                            canRedo={step < history.length - 1}
+                        />
+                    )}
 
                     <ZoomControls
                         zoomPercentage={zoomPercentage}

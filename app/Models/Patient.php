@@ -54,7 +54,16 @@ class Patient extends Model
             ->dontLogEmptyChanges();
     }
 
-    public function tapActivity(Activity $activity, string $eventName)
+    /**
+     * Merge a full snapshot of the clinical sections into every update
+     * activity; the history read-only replay renders from it.
+     *
+     * NOTE: this hook was named tapActivity() until the installed
+     * spatie/activitylog major renamed it to beforeActivityLogged() —
+     * under the old name it was silently never called and snapshots
+     * were stored empty (found via issue #5's snapshot test).
+     */
+    public function beforeActivityLogged(Activity $activity, string $eventName)
     {
         if ($eventName === 'updated') {
             $activity->properties = $activity->properties->merge([

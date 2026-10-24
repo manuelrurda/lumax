@@ -25,6 +25,12 @@ class UpdatePatientRequest extends FormRequest
             'antecedentes_oftalmologicos' => ['nullable', 'array'],
             'exploracion_fisica' => ['nullable', 'array'],
             'estrabograma' => ['nullable', 'array'],
+            // NOTE (issue #5): do NOT add nested rules like
+            // 'estrabograma.shapes' here. validated() prunes array keys
+            // that have no rule, so nested rules would silently drop
+            // `observaciones` and the legacy campo_* keys on every save.
+            // The whole section array is accepted as-is, like the other
+            // clinical sections; canvas `shapes` ride inside it.
             'refraccion' => ['nullable', 'array'],
         ];
     }
