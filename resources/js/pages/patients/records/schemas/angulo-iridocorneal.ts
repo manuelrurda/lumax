@@ -1,8 +1,7 @@
 import { Patient } from '@/types';
 
-export interface AnguloIridocornealForm {
-    // Empty for now — fields will be added later
-}
+// Empty for now — fields will be added later
+export type AnguloIridocornealForm = Record<string, never>;
 
 export const defaultAnguloIridocorneal: AnguloIridocornealForm = {};
 

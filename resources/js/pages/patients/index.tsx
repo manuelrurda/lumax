@@ -30,7 +30,11 @@ export default function PatientsPage() {
     const { patients, filters, todaysAppointments } = usePage<{
         patients: PaginatedData<Patient>;
         filters: { search?: string; sort?: string };
-        todaysAppointments: any[];
+        todaysAppointments: {
+            id: number;
+            starts_at: string;
+            patient: Patient;
+        }[];
     }>().props;
     const [searchTerm, setSearchTerm] = useState(filters?.search || '');
     const [sortBy, setSortBy] = useState(
