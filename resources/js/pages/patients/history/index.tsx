@@ -76,7 +76,7 @@ export default function PatientHistoryPage() {
                             Historial Clínico de {patient.first_name} {patient.last_name}
                         </h1>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Consulte las versiones anteriores del expediente de este paciente. Las versiones cumplen con la NOM-024.
+                            Consulte las versiones anteriores del expediente de este paciente. Cada actualización de las secciones clínicas se guarda como una versión que puede consultarse en cualquier momento.
                         </p>
                     </div>
                     

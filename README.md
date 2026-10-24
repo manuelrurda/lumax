@@ -130,7 +130,7 @@ Practical consequences of the JSONB approach: adding a field to a section is a T
 - `GET /patients/{patient}` — timeline page. Default view collapses to one entry per day; `?show_all=1` lists every change.
 - Opening a version re-renders any record tab with `?activity_id=<id>`; the layout shows the historical date and wraps the form in a disabled `fieldset` (read-only).
 
-The history page copy states the versions comply with NOM-024 — treat that as a product claim to verify, not as a certified property of this code.
+An earlier version of the history page claimed the versions comply with NOM-024. That claim was audited in issue #12, found unsubstantiated, and removed — the page now describes the version history factually. See [docs/nom-024-audit.md](docs/nom-024-audit.md) for what the implementation does, the gaps, and what claiming conformance would require.
 
 ## Record tabs: what actually persists
 
