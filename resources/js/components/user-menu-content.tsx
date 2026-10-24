@@ -5,6 +5,7 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
+import { useDraftStore } from '@/hooks/use-draft-store';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
@@ -22,6 +23,9 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
     const handleLogout = () => {
         cleanup();
         router.flushAll();
+        // Never leave unsaved clinical drafts behind for the next user
+        // of this browser (drafts persist in sessionStorage, issue #7).
+        useDraftStore.getState().clearAllDrafts();
     };
 
     return (
