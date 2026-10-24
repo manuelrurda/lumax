@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
+import type { FormDataConvertible } from '@inertiajs/core';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -209,7 +210,7 @@ export function RefraccionFormTab({
     const [isSaving, setIsSaving] = useState(false);
 
     const draftKey = `patient-${patient.id}-refraccion`;
-    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const draftState = useDraftStore((state) => state.getDraft<RefraccionForm>(draftKey));
     const setDraft = useDraftStore((state) => state.setDraft);
     const clearDraft = useDraftStore((state) => state.clearDraft);
 
@@ -245,10 +246,10 @@ export function RefraccionFormTab({
         setIsSaving(true);
         router.put(
             `/patients/${patient.id}`,
-            {
-                ...patient,
-                refraccion: data,
-            } as any,
+            { ...patient, refraccion: data } as unknown as Record<
+                string,
+                FormDataConvertible
+            >,
             {
                 onSuccess: () => {
                     setIsSaving(false);

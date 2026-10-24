@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/pagination';
 import { PaginatedData } from '@/types';
 
-export function DataPagination({ data }: { data: PaginatedData<any> }) {
+export function DataPagination({ data }: { data: PaginatedData<unknown> }) {
     if (!data || data.total === 0) return null;
 
     return (

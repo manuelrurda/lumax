@@ -2,6 +2,7 @@ import ImageCanvas from '@/components/canvas/image-canvas';
 import { Button } from '@/components/ui/button';
 import { useDraftStore } from '@/hooks/use-draft-store';
 import { router } from '@inertiajs/react';
+import type { FormDataConvertible } from '@inertiajs/core';
 import { LoaderCircle, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -19,7 +20,7 @@ export function EstrabogramaFormTab({
     const [isSaving, setIsSaving] = useState(false);
 
     const draftKey = `patient-${patient.id}-estrabograma`;
-    const draftState = useDraftStore((state) => state.drafts[draftKey]);
+    const draftState = useDraftStore((state) => state.getDraft<EstrabogramaForm>(draftKey));
     const setDraft = useDraftStore((state) => state.setDraft);
     const clearDraft = useDraftStore((state) => state.clearDraft);
 
@@ -52,10 +53,10 @@ export function EstrabogramaFormTab({
         setIsSaving(true);
         router.put(
             `/patients/${patient.id}`,
-            {
-                ...patient,
-                estrabograma: data,
-            } as any,
+            { ...patient, estrabograma: data } as unknown as Record<
+                string,
+                FormDataConvertible
+            >,
             {
                 onSuccess: () => {
                     setIsSaving(false);
