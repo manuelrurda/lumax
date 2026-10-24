@@ -65,7 +65,7 @@ export const TransitionLoader = ({
             )}
         >
             <div className="flex flex-col items-center gap-4 rounded-lg bg-background/95 p-8 shadow-lg">
-                <Loader2 className="h-12 w-12 animate-spin text-unam-gold" />
+                <Loader2 className="h-12 w-12 animate-spin text-lumax-purple" />
                 <p className="text-lg font-medium text-primary">{message}</p>
             </div>
         </div>

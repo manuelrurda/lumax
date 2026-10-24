@@ -171,11 +171,11 @@ Pest suite in `tests/` (sqlite in-memory, configured in `phpunit.xml`). Domain c
 
 ## Template leftovers
 
-Safe to ignore while working on Lumax features; candidates for cleanup, but delete deliberately (some have tests):
+Mostly cleaned up in issue #11. What was removed: the `setasign/fpdi` + `fpdi-tcpdf` Composer deps, `resources/js/components/pdf-viewer/` (plus its exclusive npm packages `react-pdf`, `react-rnd`, `re-resizable`, and the unused `qrcode.react`), `app/Mail/DocumentReceivedNotification.php`, and the dead `unam-gold` CSS class (never defined as a theme token; the brand token is `lumax-purple`, now used in its place in the nav and transition loader). The `devai/` template guide and the empty `tests/Feature/Documents/` directory were already gone before that cleanup.
 
-- `devai/` — an AI-agent guide for the *template* this repo was forked from. It describes documents/inbox/messages features that do **not** exist here. This README supersedes it.
-- Composer deps `setasign/fpdi` + `fpdi-tcpdf` (PDF stamping) and `resources/js/components/pdf-viewer/` — from the documents project; no Lumax code path uses them.
-- `app/Rules/ValidRfc.php` / `ValidCurp.php`, `app/Mail/DocumentReceivedNotification.php`, the `unam-gold` CSS class in `components/nav-main.tsx`, `bg-lumax-purple` is the real brand token.
+What deliberately stays:
+
+- `app/Rules/ValidCurp.php` (+ its unit test) — unused today, kept as planned: CURP is a plausible future patient field. (`ValidRfc.php` is no longer a leftover at all — registration uses it.)
 
 ## Notes for agents
 

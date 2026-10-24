@@ -44,7 +44,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     </div>
                                     <div
                                         className={cn(
-                                            'relative w-1 self-stretch bg-unam-gold',
+                                            'relative w-1 self-stretch bg-lumax-purple',
                                             !isActive && 'hidden',
                                         )}
                                     />
