@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 
 interface DraftStore {
-    drafts: Record<string, any>;
-    setDraft: (key: string, data: any) => void;
+    drafts: Record<string, unknown>;
+    setDraft: (key: string, data: unknown) => void;
+    getDraft: <T>(key: string) => T | undefined;
     clearDraft: (key: string) => void;
     clearAllDraftsForPatient: (patientId: string | number) => void;
     hasDraft: (key: string) => boolean;
@@ -17,6 +18,7 @@ export const useDraftStore = create<DraftStore>((set, get) => ({
                 [key]: data,
             },
         })),
+    getDraft: (key) => get().drafts[key] as never,
     clearDraft: (key) =>
         set((state) => {
             const newDrafts = { ...state.drafts };

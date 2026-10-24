@@ -3,7 +3,9 @@ import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { Calendar, dateFnsLocalizer, Event } from 'react-big-calendar';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import withDragAndDrop, {
+    type EventInteractionArgs,
+} from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {
@@ -23,7 +25,17 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 
-const DnDCalendar = withDragAndDrop(Calendar);
+const DnDCalendar = withDragAndDrop<BackendEvent>(Calendar);
+
+interface AppointmentApiEvent {
+    id: number;
+    patient_id: number;
+    patient?: { first_name: string; last_name: string } | null;
+    title: string;
+    notes?: string;
+    starts_at: string;
+    ends_at: string;
+}
 
 interface BackendEvent extends Event {
     id: number;
@@ -39,7 +51,7 @@ export function AppointmentsCalendar() {
         AppointmentFormData & { patientName: string }
     > | null>(null);
 
-    const fetchEvents = async (range?: Date[] | { start: Date; end: Date }) => {
+    const fetchEvents = async () => {
         try {
             // Can pass ?start=...&end=... if we map range
             const res = await fetch('/appointments', {
@@ -50,7 +62,7 @@ export function AppointmentsCalendar() {
             });
             const data = await res.json();
             setEvents(
-                data.map((e: any) => ({
+                data.map((e: AppointmentApiEvent) => ({
                     id: e.id,
                     patientId: e.patient_id,
                     patientName: e.patient
@@ -71,8 +83,10 @@ export function AppointmentsCalendar() {
         fetchEvents();
     }, []);
 
-    const onEventResize = (data: any) => {
-        const { event, start, end } = data;
+    const onEventResize = (data: EventInteractionArgs<BackendEvent>) => {
+        const { event } = data;
+        const start = data.start instanceof Date ? data.start : new Date(data.start);
+        const end = data.end instanceof Date ? data.end : new Date(data.end);
         router.put(
             `/appointments/${event.id}`,
             {
@@ -83,8 +97,10 @@ export function AppointmentsCalendar() {
         );
     };
 
-    const onEventDrop = (data: any) => {
-        const { event, start, end } = data;
+    const onEventDrop = (data: EventInteractionArgs<BackendEvent>) => {
+        const { event } = data;
+        const start = data.start instanceof Date ? data.start : new Date(data.start);
+        const end = data.end instanceof Date ? data.end : new Date(data.end);
         router.put(
             `/appointments/${event.id}`,
             {
@@ -100,8 +116,7 @@ export function AppointmentsCalendar() {
         setDialogOpen(true);
     };
 
-    const handleSelectEvent = (e: any) => {
-        const event = e as BackendEvent;
+    const handleSelectEvent = (event: BackendEvent) => {
         setDialogData({
             id: event.id,
             patientId: event.patientId,
