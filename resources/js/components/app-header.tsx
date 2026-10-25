@@ -57,7 +57,7 @@ const rightNavItems: NavItem[] = [
 ];
 
 const activeItemStyles =
-    'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
+    'bg-lumax-purple/10 text-lumax-purple dark:bg-lumax-purple/30 dark:text-white';
 
 interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
@@ -69,7 +69,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const getInitials = useInitials();
     return (
         <>
-            <div className="border-b border-sidebar-border/80">
+            <div className="border-b border-sidebar-border/80 bg-lumax-purple/5">
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
@@ -248,7 +248,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             src={auth.user.avatar}
                                             alt={auth.user.first_name}
                                         />
-                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                        <AvatarFallback className="rounded-lg bg-lumax-orange/25 text-lumax-purple-accent dark:bg-lumax-orange/30 dark:text-white">
                                             {getInitials(auth.user.first_name)}
                                         </AvatarFallback>
                                     </Avatar>

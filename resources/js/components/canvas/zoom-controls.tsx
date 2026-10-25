@@ -21,7 +21,7 @@ export const ZoomControls = ({
                     <TooltipTrigger asChild>
                         <button
                             onClick={onZoomOut}
-                            className="p-1.5 rounded hover:bg-slate-100 transition-colors text-slate-600"
+                            className="p-1.5 rounded hover:bg-lumax-purple/10 transition-colors text-lumax-purple/80"
                         >
                             <ZoomOut className="w-4 h-4" strokeWidth={2.5} />
                         </button>
@@ -35,7 +35,7 @@ export const ZoomControls = ({
                     <TooltipTrigger asChild>
                         <button
                             onClick={onResetZoom}
-                            className="px-2 py-1 rounded hover:bg-slate-100 transition-colors text-xs font-semibold text-slate-600 min-w-[50px] text-center"
+                            className="px-2 py-1 rounded hover:bg-lumax-purple/10 transition-colors text-xs font-semibold text-lumax-purple/80 min-w-[50px] text-center"
                         >
                             {zoomPercentage}%
                         </button>
@@ -49,7 +49,7 @@ export const ZoomControls = ({
                     <TooltipTrigger asChild>
                         <button
                             onClick={onZoomIn}
-                            className="p-1.5 rounded hover:bg-slate-100 transition-colors text-slate-600"
+                            className="p-1.5 rounded hover:bg-lumax-purple/10 transition-colors text-lumax-purple/80"
                         >
                             <ZoomIn className="w-4 h-4" strokeWidth={2.5} />
                         </button>
@@ -59,13 +59,13 @@ export const ZoomControls = ({
                     </TooltipContent>
                 </Tooltip>
 
-                <div className="w-px h-4 bg-slate-200 mx-0.5" />
+                <div className="w-px h-4 bg-lumax-purple/20 mx-0.5" />
 
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <button
                             onClick={onResetZoom}
-                            className="p-1.5 rounded hover:bg-slate-100 transition-colors text-slate-600"
+                            className="p-1.5 rounded hover:bg-lumax-purple/10 transition-colors text-lumax-purple/80"
                         >
                             <RotateCcw className="w-4 h-4" strokeWidth={2.5} />
                         </button>

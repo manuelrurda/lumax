@@ -98,7 +98,7 @@ export function EstrabogramaFormTab({
         <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between border-b pb-4">
-                <h2 className="text-xl font-semibold">Estrabograma</h2>
+                <h2 className="text-xl font-semibold text-lumax-purple">Estrabograma</h2>
                 <Button
                     onClick={handleSubmit(onSubmit)}
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"

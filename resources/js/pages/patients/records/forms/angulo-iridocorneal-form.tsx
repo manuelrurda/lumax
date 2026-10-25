@@ -32,7 +32,7 @@ export function AnguloIridocornealFormTab({
             className="space-y-8 rounded-xl border bg-card p-6 shadow-sm"
         >
             <div className="flex items-center justify-between border-b pb-4">
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-xl font-semibold text-lumax-purple">
                     Ángulo Iridocorneal
                 </h2>
                 <Button

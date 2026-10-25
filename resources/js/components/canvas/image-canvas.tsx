@@ -397,7 +397,7 @@ export default function ImageCanvas({
             className={`relative overflow-hidden ${className}`}
         >
             {!image && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-50 font-medium text-slate-400">
+                <div className="absolute inset-0 flex items-center justify-center bg-lumax-purple/5 font-medium text-lumax-purple/50">
                     Loading canvas...
                 </div>
             )}

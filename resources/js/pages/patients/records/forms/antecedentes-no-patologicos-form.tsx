@@ -293,7 +293,7 @@ export function AntecedentesNoPatologicosForm({
                     {fields.map((field, index) => (
                         <div
                             key={field.id}
-                            className="flex items-start gap-4 rounded-lg border bg-gray-50/50 p-4"
+                            className="flex items-start gap-4 rounded-lg border bg-lumax-purple/5 p-4"
                         >
                             <div className="flex-1 space-y-2">
                                 <Label>Nombre del antecedente</Label>

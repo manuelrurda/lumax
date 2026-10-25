@@ -59,7 +59,7 @@ export function PatientRecordLayout({
             <div className="px-6 py-6 pb-0">
                 <div className="flex items-start gap-4">
                     <div>
-                        <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-foreground">
+                        <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-lumax-purple">
                             {patient.first_name} {patient.last_name}
                             {!isHistoryView && <EditPatientDialog patient={patient} />}
                         </h1>
@@ -101,8 +101,8 @@ export function PatientRecordLayout({
                                 href={getHref(tab.href)}
                                 className={`border-b-2 pb-3 text-sm font-semibold transition-colors ${
                                     isActive
-                                        ? 'border-lumax-purple text-foreground'
-                                        : 'border-transparent text-muted-foreground hover:border-muted hover:text-foreground'
+                                        ? 'border-lumax-orange text-lumax-purple'
+                                        : 'border-transparent text-muted-foreground hover:border-lumax-purple/40 hover:text-foreground'
                                 }`}
                             >
                                 {tab.label}

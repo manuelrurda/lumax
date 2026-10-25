@@ -101,7 +101,7 @@ export function AntecedentesTab({
             className="space-y-8 rounded-xl border bg-card p-6 shadow-sm"
         >
             <div className="flex items-center justify-between border-b pb-4">
-                <h2 className="text-xl font-semibold">Antecedentes</h2>
+                <h2 className="text-xl font-semibold text-lumax-purple">Antecedentes</h2>
                 <Button
                     type="submit"
                     className="bg-lumax-purple text-white hover:bg-lumax-purple-accent"
