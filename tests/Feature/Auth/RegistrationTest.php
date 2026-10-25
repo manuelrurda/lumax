@@ -110,7 +110,7 @@ test('registration does not write the plaintext password to the log', function (
     $response = $this->post(route('register.store'), [
         'first_name' => 'Log',
         'last_name' => 'Safety',
-        'rfc' => 'ABCD123456EF7',
+        'rfc' => 'XAXX010101000',
         'email' => 'log.safety@example.com',
         'password' => $secret,
         'password_confirmation' => $secret,
