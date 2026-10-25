@@ -119,7 +119,7 @@ A patient's clinical record is **not** normalized into visits or per-section tab
 | `antecedentes_oftalmologicos` | Antecedentes Oftalmológicos | Ophthalmological background. |
 | `exploracion_fisica` | Exploración Física | Physical examination. |
 | `refraccion` | Refracción | Per-eye visual acuity (decimal / fraction / Snellen 6m / Snellen 20ft / logMAR scales in `schemas/refraccion.ts`), keratometry, retinoscopy, refraction, cycloplegia, addition, distance, comments. |
-| `estrabograma` | Estrabograma | Intended for the strabismus diagram — see the warning below; currently holds the legacy form's fields (`campo_1`…`campo_26`, `observaciones`). |
+| `estrabograma` | Estrabograma | Strabismus diagram annotations: canvas `shapes` (issue #5) plus the legacy form's fields (`campo_1`…`campo_26`, `observaciones`), which remain readable for older records. |
 
 Practical consequences of the JSONB approach: adding a field to a section is a TS-schema + form change only (no migration), but the backend accepts any array shape — `UpdatePatientRequest` validates sections as just `nullable|array`, so the TS schema is the real contract. Keep schemas accurate.
 
@@ -140,7 +140,7 @@ The history page copy states the versions comply with NOM-024 — treat that as 
 | Antecedentes Oftalmológicos | ✅ Working form, persisted. |
 | Exploración Física | ✅ Working form, persisted. |
 | Refracción | ✅ Working form, persisted. Most complete schema. |
-| Estrabograma | ⚠️ **Canvas drawings are NOT saved.** The tab now renders the Konva `ImageCanvas` over `public/estrabograma2.svg`, but shapes live in component state — `ImageCanvas` has no `onChange`/`onSave` prop, and 'Guardar cambios' still submits the legacy form data (the original 26-field form is commented out in `estrabograma-form.tsx`). |
+| Estrabograma | ✅ Canvas drawings persist (issue #5). `ImageCanvas` is controlled (`initialShapes` + `onChange`, `readOnly` in history view); shapes are stored in the `estrabograma` JSON under `shapes`, alongside `observaciones` and any legacy `campo_*` data. |
 | Ángulo Iridocorneal | ❌ **Stub.** Page, route, tab and schema exist, but the form renders no fields and its submit handler only `console.log`s (`angulo-iridocorneal-form.tsx`). There is no DB column, model field, or validation rule for it. |
 
 ## Adding a new clinical section (checklist)
@@ -163,7 +163,7 @@ Pest suite in `tests/` (sqlite in-memory, configured in `phpunit.xml`). Domain c
 
 - **Passwords are logged on registration:** `RegisteredUserController::store()` calls `Log::info('Register request payload', $request->all())`, which writes the plaintext password to the log. Remove before anything else ships.
 - **Appointment patient ownership:** `AppointmentsController` validates `patient_id` as `exists:patients,id` only. A doctor can attach *another doctor's* patient to their own appointment. Scope it to the authenticated user's patients (patients themselves are correctly owner-scoped everywhere else).
-- **Estrabograma canvas not wired to persistence** and **Ángulo Iridocorneal is a stub** — see the tab table above.
+- **Ángulo Iridocorneal is a stub** — see the tab table above.
 - **`/canvas-test` is public** (registered in `web.php` without auth middleware) and renders an external stock photo. Remove or protect before deploying.
 - **Registration is fully open** — anyone can create a doctor account. Fine for local dev; gate it before production.
 - **Drafts are volatile** — `use-draft-store` is not persisted to storage, so unsaved clinical notes vanish on reload.

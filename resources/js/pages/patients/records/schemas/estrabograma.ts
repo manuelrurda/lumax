@@ -1,6 +1,14 @@
+import type { CanvasShape } from '@/components/canvas/image-canvas';
 import { Patient } from '@/types';
 
 export interface EstrabogramaForm {
+    /**
+     * Canvas annotation shapes (issue #5), serialized from the Konva
+     * editor: [{ type: 'line'|'arrow'|'text', points?, x?, y?, text?, color? }].
+     * Stored inside the same estrabograma JSON as the legacy fields below,
+     * which remain readable for records saved before the canvas existed.
+     */
+    shapes?: CanvasShape[];
     // Numbered inputs matching diagram positions (top-to-bottom, left-to-right per group)
     campo_1: string;  // Top-left box, input 1
     campo_2: string;  // Top-left box, input 2
