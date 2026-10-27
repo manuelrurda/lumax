@@ -26,6 +26,19 @@ class BugReportTest extends TestCase
         ], $overrides);
     }
 
+    private function allowEmails(string|array|null $emails): void
+    {
+        config(['bug-reports.allowed_emails' => $emails]);
+    }
+
+    private function createAllowedUser(array $attributes = []): User
+    {
+        $user = User::factory()->create($attributes);
+        $this->allowEmails($user->email);
+
+        return $user;
+    }
+
     /**
      * Fake the whole UploadThing v7 flow: prepareUpload, ingest PUT.
      */
@@ -71,7 +84,7 @@ class BugReportTest extends TestCase
 
     public function test_description_is_required(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $response = $this->actingAs($user)->post('/bug-reports', $this->payload(['description' => '']));
 
@@ -81,7 +94,7 @@ class BugReportTest extends TestCase
 
     public function test_too_short_description_fails(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $response = $this->actingAs($user)->post('/bug-reports', $this->payload(['description' => 'ab']));
 
@@ -91,7 +104,7 @@ class BugReportTest extends TestCase
 
     public function test_type_must_be_bug_or_mejora(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $response = $this->actingAs($user)->post('/bug-reports', $this->payload(['type' => 'otro']));
 
@@ -101,7 +114,7 @@ class BugReportTest extends TestCase
 
     public function test_valid_report_is_stored_with_context_and_auto_title(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $response = $this->actingAs($user)
             ->withHeader('User-Agent', 'Mozilla/5.0 (TestBrowser)')
@@ -127,7 +140,7 @@ class BugReportTest extends TestCase
 
     public function test_title_falls_back_when_first_line_is_empty_and_truncates(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $this->actingAs($user)->post('/bug-reports', $this->payload([
             'description' => str_repeat('a', 120),
@@ -141,7 +154,7 @@ class BugReportTest extends TestCase
         config(['services.uploadthing.token' => 'sk_live_test_token']);
         $this->fakeUploadThing();
 
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $response = $this->actingAs($user)->post('/bug-reports', $this->payload([
             'screenshot' => UploadedFile::fake()->image('captura.jpg', 800, 600),
@@ -169,7 +182,7 @@ class BugReportTest extends TestCase
         config(['services.uploadthing.token' => null]);
         Http::fake(); // must never be called
 
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $response = $this->actingAs($user)->post('/bug-reports', $this->payload([
             'screenshot' => UploadedFile::fake()->image('captura.jpg', 800, 600),
@@ -186,7 +199,7 @@ class BugReportTest extends TestCase
 
     public function test_more_than_four_attachments_are_rejected(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
 
         $files = collect(range(1, 5))
             ->map(fn ($i) => UploadedFile::fake()->image("foto{$i}.jpg"))
@@ -199,7 +212,7 @@ class BugReportTest extends TestCase
 
     public function test_index_lists_reports_for_authenticated_users(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
         $report = BugReport::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->get('/bug-reports');
@@ -215,7 +228,7 @@ class BugReportTest extends TestCase
 
     public function test_show_displays_a_report_with_its_context(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createAllowedUser();
         $report = BugReport::factory()->create([
             'user_id' => $user->id,
             'description' => 'Descripción detallada del problema reportado.',
@@ -231,5 +244,64 @@ class BugReportTest extends TestCase
             ->has('report.attachments', 0)
             ->has('report.user')
         );
+    }
+
+    public function test_non_allowlisted_user_gets_403_on_index_show_and_store(): void
+    {
+        $this->allowEmails('allowed@example.com');
+        $user = User::factory()->create(['email' => 'not-allowed@example.com']);
+        $report = BugReport::factory()->create();
+
+        $this->actingAs($user)->get('/bug-reports')->assertForbidden();
+        $this->actingAs($user)->get('/bug-reports/'.$report->id)->assertForbidden();
+        $this->actingAs($user)->post('/bug-reports', $this->payload())->assertForbidden();
+
+        $this->assertDatabaseCount('bug_reports', 1);
+    }
+
+    public function test_empty_allowlist_denies_every_authenticated_user(): void
+    {
+        $this->allowEmails('');
+        $user = User::factory()->create(['email' => 'would-be-allowed@example.com']);
+        $report = BugReport::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)->get('/bug-reports')->assertForbidden();
+        $this->actingAs($user)->get('/bug-reports/'.$report->id)->assertForbidden();
+        $this->actingAs($user)->post('/bug-reports', $this->payload())->assertForbidden();
+
+        $this->assertDatabaseCount('bug_reports', 1);
+    }
+
+    public function test_allowlist_matching_is_case_insensitive_end_to_end(): void
+    {
+        $user = User::factory()->create(['email' => 'doctor@example.com']);
+        $this->allowEmails('  DOCTOR@EXAMPLE.COM  ');
+
+        $this->actingAs($user)->get('/bug-reports')->assertOk();
+
+        $response = $this->actingAs($user)->post('/bug-reports', $this->payload());
+        $response->assertRedirect();
+        $this->assertDatabaseCount('bug_reports', 1);
+    }
+
+    public function test_bug_report_access_is_shared_with_the_frontend(): void
+    {
+        $allowedUser = $this->createAllowedUser();
+
+        $this->actingAs($allowedUser)
+            ->get('/bug-reports')
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('bug-reports/index')
+                ->where('bugReports.canAccess', true)
+            );
+
+        $otherUser = User::factory()->create();
+
+        $this->actingAs($otherUser)
+            ->get('/patients')
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('patients/index')
+                ->where('bugReports.canAccess', false)
+            );
     }
 }

@@ -27,7 +27,7 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
-    bugReports: { uploadsEnabled: boolean };
+    bugReports: { canAccess: boolean; uploadsEnabled: boolean };
     [key: string]: unknown;
 }
 

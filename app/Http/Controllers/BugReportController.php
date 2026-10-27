@@ -8,7 +8,7 @@ use App\Models\BugReportAttachment;
 use App\Services\UploadThingException;
 use App\Services\UploadThingService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,12 +18,15 @@ class BugReportController extends Controller
     /**
      * List all bug reports, newest first.
      *
-     * NOTE: during this single-doctor testing phase every authenticated user
-     * can see all reports. Revisit (scope by user) before opening the app to
-     * more doctors.
+     * Access is controlled by the configured email allowlist (see
+     * config/bug-reports.php). The route middleware is the first enforcement
+     * layer; this policy check is a second, defense-in-depth layer. Reports
+     * are shared among allowlisted users rather than scoped to their author.
      */
     public function index(): Response
     {
+        Gate::authorize('viewAny', BugReport::class);
+
         $reports = BugReport::query()
             ->with('user')
             ->withCount('attachments')
@@ -40,6 +43,8 @@ class BugReportController extends Controller
      */
     public function show(BugReport $bugReport): Response
     {
+        Gate::authorize('view', $bugReport);
+
         $bugReport->load(['user', 'attachments']);
 
         return Inertia::render('bug-reports/show', [
@@ -56,6 +61,8 @@ class BugReportController extends Controller
      */
     public function store(StoreBugReportRequest $request, UploadThingService $uploads): RedirectResponse
     {
+        Gate::authorize('create', BugReport::class);
+
         $validated = $request->validated();
 
         $title = Str::of(Str::before($validated['description'], "\n"))
