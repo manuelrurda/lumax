@@ -8,30 +8,31 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Minimal server-side client for the UploadThing v6 API.
+ * Minimal server-side client for the UploadThing v7 API.
  *
- * Flow (per https://docs.uploadthing.com/api-reference/openapi-spec):
- *  1. POST /v6/uploadFiles with the file metadata -> returns a presigned
- *     upload URL and the file key for each file.
- *  2. PUT the binary contents to the presigned URL.
- *  3. Poll GET /v6/pollUpload/{key} until the file status is done.
+ * The configured UPLOADTHING_TOKEN is the v7 token from the dashboard: a
+ * base64-encoded JSON object ({apiKey, appId, regions}). The REST API
+ * authenticates with the raw apiKey inside it, so it is extracted here.
+ * (Verified against the live API on 2026-10-26 — the v6 endpoints reject
+ * current apps with "Unsupported operation".)
+ *
+ * Flow (server-side uploads):
+ *  1. POST /v7/prepareUpload with one file's metadata -> returns a signed
+ *     ingest URL and the file key.
+ *  2. PUT the file to the signed URL as multipart/form-data (field "file"),
+ *     exactly like the official JS client; the response is synchronous and
+ *     contains the final file URL (ufsUrl). There is no polling step in v7.
  *
  * Only used for bug report attachments (screenshots + user files). The whole
  * feature degrades gracefully when no token is configured: see configured().
  */
 class UploadThingService
 {
-    private const API_BASE = 'https://api.uploadthing.com/v6';
-
-    private const API_VERSION = '6.4.0';
-
-    private const POLL_ATTEMPTS = 5;
-
-    private const POLL_DELAY_MS = 400;
+    private const API_BASE = 'https://api.uploadthing.com/v7';
 
     public function configured(): bool
     {
-        return filled(config('services.uploadthing.token'));
+        return filled($this->apiKey());
     }
 
     /**
@@ -47,30 +48,32 @@ class UploadThingService
             throw new UploadThingException('UploadThing no está configurado (falta UPLOADTHING_TOKEN).');
         }
 
+        // Attach a stream for real files: Laravel's multipart builder drops
+        // empty-string contents, which breaks zero-byte (or fake) files.
+        $stream = null;
+
         if ($file instanceof UploadedFile) {
-            $contents = file_get_contents($file->getRealPath());
             $filename ??= $file->getClientOriginalName();
             $mime ??= $file->getClientMimeType();
             $size = $file->getSize();
+            $stream = fopen($file->getRealPath(), 'r');
+            $contents = $stream;
         } else {
             $contents = $file;
             $size = strlen($contents);
         }
 
-        if ($contents === false || $filename === null) {
+        if ($contents === false || $contents === null || $filename === null) {
             throw new UploadThingException('No se pudo leer el archivo a subir.');
         }
 
         try {
-            $presign = Http::withHeaders($this->headers())
+            $prepare = Http::withHeaders($this->headers())
                 ->acceptJson()
-                ->post(self::API_BASE.'/uploadFiles', [
-                    'files' => [[
-                        'name' => $filename,
-                        'size' => $size,
-                        'type' => $mime,
-                        'customId' => null,
-                    ]],
+                ->post(self::API_BASE.'/prepareUpload', [
+                    'fileName' => $filename,
+                    'fileSize' => $size,
+                    'fileType' => $mime,
                     'metadata' => new \stdClass,
                     'contentDisposition' => 'inline',
                     'acl' => 'public-read',
@@ -79,31 +82,32 @@ class UploadThingService
             throw new UploadThingException('No se pudo contactar a UploadThing.', previous: $e);
         }
 
-        if ($presign->failed()) {
-            Log::warning('UploadThing uploadFiles failed', ['status' => $presign->status(), 'body' => $presign->body()]);
+        if ($prepare->failed()) {
+            Log::warning('UploadThing prepareUpload failed', ['status' => $prepare->status(), 'body' => $prepare->body()]);
             throw new UploadThingException('UploadThing rechazó la solicitud de subida.');
         }
 
-        $fileData = $presign->json('data.0');
-        $url = $fileData['url'] ?? $fileData['urls']['url'] ?? null;
-        $key = $fileData['key'] ?? $fileData['fileKey'] ?? null;
+        $url = $prepare->json('url');
+        $key = $prepare->json('key');
 
         if (! $url || ! $key) {
             throw new UploadThingException('Respuesta inesperada de UploadThing al preparar la subida.');
         }
 
         try {
-            $put = Http::withBody($contents, $mime ?? 'application/octet-stream')->put($url);
+            $put = Http::attach('file', $contents, $filename, ['Content-Type' => $mime ?? 'application/octet-stream'])
+                ->withHeaders(['Range' => 'bytes=0-'])
+                ->put($url);
         } catch (ConnectionException $e) {
             throw new UploadThingException('No se pudo subir el archivo a UploadThing.', previous: $e);
         }
 
         if ($put->failed()) {
-            Log::warning('UploadThing presigned PUT failed', ['status' => $put->status()]);
+            Log::warning('UploadThing ingest PUT failed', ['status' => $put->status(), 'body' => $put->body()]);
             throw new UploadThingException('La subida del archivo a UploadThing falló.');
         }
 
-        $fileUrl = $this->pollUntilDone($key, $fileData['fileUrl'] ?? null);
+        $fileUrl = $put->json('ufsUrl') ?? $put->json('url') ?? 'https://utfs.io/f/'.$key;
 
         return [
             'url' => $fileUrl,
@@ -115,44 +119,25 @@ class UploadThingService
     }
 
     /**
-     * Poll the file status until UploadThing reports it as done.
-     *
-     * @throws UploadThingException
+     * The v7 token is base64 JSON carrying the apiKey; a raw sk_ key (the
+     * dashboard's V6 tab) is also accepted as-is.
      */
-    private function pollUntilDone(string $key, ?string $fallbackUrl = null): string
+    private function apiKey(): ?string
     {
-        for ($attempt = 0; $attempt < self::POLL_ATTEMPTS; $attempt++) {
-            try {
-                $response = Http::withHeaders($this->headers())
-                    ->acceptJson()
-                    ->get(self::API_BASE.'/pollUpload/'.$key);
-            } catch (ConnectionException) {
-                $response = null;
-            }
+        $token = (string) config('services.uploadthing.token');
 
-            if ($response && $response->successful()) {
-                $status = $response->json('status');
-
-                if ($status === 'done') {
-                    return $response->json('fileData.fileUrl')
-                        ?? $response->json('fileData.url')
-                        ?? $fallbackUrl
-                        ?? 'https://utfs.io/f/'.$key;
-                }
-
-                if (in_array($status, ['failed', 'error'], true)) {
-                    throw new UploadThingException('UploadThing no pudo procesar el archivo subido.');
-                }
-            }
-
-            if ($attempt < self::POLL_ATTEMPTS - 1) {
-                usleep(self::POLL_DELAY_MS * 1000);
-            }
+        if ($token === '') {
+            return null;
         }
 
-        // The bytes are already stored; if polling times out we can still
-        // reference the file by its deterministic utfs URL.
-        return $fallbackUrl ?? 'https://utfs.io/f/'.$key;
+        $decoded = base64_decode($token, true);
+        $json = $decoded !== false ? json_decode($decoded, true) : null;
+
+        if (is_array($json) && filled($json['apiKey'] ?? null)) {
+            return (string) $json['apiKey'];
+        }
+
+        return $token;
     }
 
     /**
@@ -161,8 +146,7 @@ class UploadThingService
     private function headers(): array
     {
         return [
-            'x-uploadthing-api-key' => (string) config('services.uploadthing.token'),
-            'x-uploadthing-version' => self::API_VERSION,
+            'x-uploadthing-api-key' => (string) $this->apiKey(),
         ];
     }
 }

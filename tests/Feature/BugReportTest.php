@@ -27,38 +27,29 @@ class BugReportTest extends TestCase
     }
 
     /**
-     * Fake the whole UploadThing v6 flow: presign, presigned PUT, poll.
+     * Fake the whole UploadThing v7 flow: prepareUpload, ingest PUT.
      */
     private function fakeUploadThing(): void
     {
         Http::fake(function ($request) {
             $url = $request->url();
 
-            if (str_contains($url, 'api.uploadthing.com/v6/uploadFiles')) {
-                $file = $request->data()['files'][0];
-                $key = 'key-'.$file['name'];
+            if (str_contains($url, 'api.uploadthing.com/v7/prepareUpload')) {
+                $key = 'key-'.$request->data()['fileName'];
 
                 return Http::response([
-                    'data' => [[
-                        'url' => 'https://upload.uploadthing.com/presigned/'.$key,
-                        'key' => $key,
-                        'fileUrl' => 'https://utfs.io/f/'.$key,
-                        'fileName' => $file['name'],
-                    ]],
+                    'url' => 'https://ingest.uploadthing.com/'.$key,
+                    'key' => $key,
                 ], 200);
             }
 
-            if (str_contains($url, 'api.uploadthing.com/v6/pollUpload/')) {
-                $key = basename($url);
+            if (str_contains($url, 'ingest.uploadthing.com')) {
+                $key = basename(parse_url($url, PHP_URL_PATH));
 
                 return Http::response([
-                    'status' => 'done',
-                    'fileData' => ['fileUrl' => 'https://utfs.io/f/'.$key],
+                    'ufsUrl' => 'https://utfs.io/f/'.$key,
+                    'url' => 'https://utfs.io/f/'.$key,
                 ], 200);
-            }
-
-            if (str_contains($url, 'upload.uploadthing.com')) {
-                return Http::response('', 200);
             }
 
             return Http::response('unstubbed: '.$url, 404);
