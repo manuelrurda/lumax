@@ -28,6 +28,12 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    // File storage for bug report attachments (screenshots + user files).
+    // Without a token, bug reports are still saved, just without files.
+    'uploadthing' => [
+        'token' => env('UPLOADTHING_TOKEN'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

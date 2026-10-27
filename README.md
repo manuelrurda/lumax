@@ -132,6 +132,20 @@ Practical consequences of the JSONB approach: adding a field to a section is a T
 
 An earlier version of the history page claimed the versions comply with NOM-024. That claim was audited in issue #12, found unsubstantiated, and removed — the page now describes the version history factually. See [docs/nom-024-audit.md](docs/nom-024-audit.md) for what the implementation does, the gaps, and what claiming conformance would require.
 
+## Bug & feature reports (in-app)
+
+The sidebar footer has a persistent **«Reportar problema»** button (mounted once in `components/app-sidebar.tsx`, so it shows on every authenticated page). It opens a dialog (`components/bug-report/bug-report-dialog.tsx`) where the doctor picks a type — **Error** (`bug`) or **Mejora o función nueva** (`mejora`) — and writes a description; the title is auto-generated server-side from the first line of the description. On submit the app automatically attaches context an agent needs to act on the report:
+
+- the page it was sent from: `page_path`, `page_url`, the Inertia `page_component`, and the `viewport` size;
+- the browser `user_agent` (read server-side from the request header);
+- a **screenshot of the page** captured in the browser with `html-to-image` *before* the dialog opens (so the dialog is never in the shot), plus up to 4 user-attached files (images or PDF, 8 MB each).
+
+Reports are listed at `GET /bug-reports` with a detail page at `GET /bug-reports/{id}` (also in the sidebar as «Reportes»). During this single-doctor testing phase any authenticated user can view all reports.
+
+**Storage:** two tables — `bug_reports` (`user_id`, `type`, `title`, `description`, `page_path`, `page_url`, `page_component`, `user_agent`, `viewport`, `status` starting at `nuevo`, timestamps) and `bug_report_attachments` (`bug_report_id`, `kind` = `screenshot` | `attachment`, `file_url`, `file_name`, `file_type`, `file_size`). To read pending work, query `bug_reports` where `status = 'nuevo'` ordered by `created_at`, joining `bug_report_attachments` for the screenshot/file URLs.
+
+**Files need UploadThing.** Attachment binaries are stored on UploadThing via `app/Services/UploadThingService.php` (v6 API: `uploadFiles` presign → PUT to the presigned URL → poll `pollUpload/{key}`). Set `UPLOADTHING_TOKEN` in `.env` to enable them. **Without the token the feature still works**: reports are saved with all their context, just without screenshot/attachments, and the dialog warns the user about it (the `bugReports.uploadsEnabled` shared Inertia prop drives that state).
+
 ## Record tabs: what actually persists
 
 | Tab | State |

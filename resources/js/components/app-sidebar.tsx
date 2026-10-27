@@ -1,3 +1,4 @@
+import { BugReportDialog } from '@/components/bug-report/bug-report-dialog';
 import { NavMain } from '@/components/nav-main';
 import {
     Sidebar,
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { CalendarDays, UsersRound } from 'lucide-react';
+import { CalendarDays, MessageSquareWarning, UsersRound } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavUser } from './nav-user';
 
@@ -24,6 +25,11 @@ const mainNavItems: NavItem[] = [
         title: 'Citas',
         href: '/appointments',
         icon: CalendarDays,
+    },
+    {
+        title: 'Reportes',
+        href: '/bug-reports',
+        icon: MessageSquareWarning,
     },
 ];
 
@@ -49,6 +55,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                <BugReportDialog />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

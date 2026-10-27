@@ -49,6 +49,9 @@ class HandleInertiaRequests extends Middleware
                 'error'   => fn () => $request->session()->get('error'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'bugReports' => [
+                'uploadsEnabled' => app(\App\Services\UploadThingService::class)->configured(),
+            ],
         ];
     }
 }
