@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Patient } from '@/types';
 import { router } from '@inertiajs/react';
-import { Edit } from 'lucide-react';
+import { Archive, Edit } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -25,6 +25,17 @@ type FormData = {
 
 export function EditPatientDialog({ patient }: { patient: Patient }) {
     const [open, setOpen] = useState(false);
+    const [archiveOpen, setArchiveOpen] = useState(false);
+    const futureAppointments = patient.future_appointments_count ?? 0;
+
+    const handleArchive = () => {
+        router.delete(`/patients/${patient.id}`, {
+            onSuccess: () => {
+                setArchiveOpen(false);
+                setOpen(false);
+            },
+        });
+    };
     const {
         register,
         handleSubmit,
@@ -149,7 +160,65 @@ export function EditPatientDialog({ patient }: { patient: Patient }) {
                         </Button>
                     </DialogFooter>
                 </form>
+
+                <div className="space-y-3 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
+                    <div className="space-y-0.5 text-red-600 dark:text-red-100">
+                        <p className="font-medium">Archivar paciente</p>
+                        <p className="text-sm">
+                            El paciente dejará de aparecer en la lista y en las
+                            búsquedas. Su expediente e historial se conservan.
+                        </p>
+                    </div>
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => setArchiveOpen(true)}
+                    >
+                        <Archive className="h-4 w-4" />
+                        Archivar paciente
+                    </Button>
+                </div>
             </DialogContent>
+
+            <Dialog open={archiveOpen} onOpenChange={setArchiveOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>
+                            ¿Archivar a {patient.first_name} {patient.last_name}?
+                        </DialogTitle>
+                        <DialogDescription>
+                            El paciente dejará de aparecer en la lista y en las
+                            búsquedas. Su expediente e historial se conservan y
+                            podrás restaurarlo. Sus citas futuras se eliminarán.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {futureAppointments > 0 && (
+                        <p className="text-sm font-medium text-destructive">
+                            Tiene {futureAppointments}{' '}
+                            {futureAppointments === 1
+                                ? 'cita futura que se eliminará'
+                                : 'citas futuras que se eliminarán'}
+                            .
+                        </p>
+                    )}
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setArchiveOpen(false)}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={handleArchive}
+                        >
+                            Sí, archivar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Dialog>
     );
 }

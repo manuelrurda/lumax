@@ -27,7 +27,11 @@ return new class extends Migration
             $table->jsonb('exploracion_fisica')->nullable();
             $table->jsonb('estrabograma')->nullable();
             $table->jsonb('refraccion')->nullable();
-            
+
+            // Archive (issue #9): soft delete only — the clinical record
+            // and its activity history are preserved and restorable.
+            $table->softDeletes();
+
             $table->timestamps();
         });
     }

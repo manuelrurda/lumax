@@ -27,7 +27,10 @@ class AppointmentsController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
-        $query = $request->user()->appointments()->with('patient:id,first_name,last_name');
+        // whereHas('patient') respects the patient's soft-delete scope, so
+        // appointments of archived patients (their past ones stay in the DB)
+        // never reach the calendar feed.
+        $query = $request->user()->appointments()->with('patient:id,first_name,last_name')->whereHas('patient');
 
         if ($start) {
             $query->where('starts_at', '>=', Carbon::parse($start));
@@ -42,7 +45,9 @@ class AppointmentsController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'patient_id' => ['required', Rule::exists('patients', 'id')->where('user_id', $request->user()->id)],
+            // exists() queries the table directly, so exclude soft-deleted
+            // (archived) patients explicitly.
+            'patient_id' => ['required', Rule::exists('patients', 'id')->where('user_id', $request->user()->id)->whereNull('deleted_at')],
             'title' => 'required|string|max:255',
             'notes' => 'nullable|string',
             'starts_at' => 'required|date',
@@ -70,7 +75,7 @@ class AppointmentsController extends Controller
         }
 
         $validated = $request->validate([
-            'patient_id' => ['sometimes', Rule::exists('patients', 'id')->where('user_id', $request->user()->id)],
+            'patient_id' => ['sometimes', Rule::exists('patients', 'id')->where('user_id', $request->user()->id)->whereNull('deleted_at')],
             'title' => 'sometimes|string|max:255',
             'notes' => 'nullable|string',
             'starts_at' => 'sometimes|date',

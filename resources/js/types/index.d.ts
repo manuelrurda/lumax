@@ -48,6 +48,8 @@ export interface Patient {
     email: string | null;
     phone: string | null;
     updated_at: string;
+    future_appointments_count?: number;
+    deleted_at?: string | null;
 }
 
 export interface PaginatedData<T> {

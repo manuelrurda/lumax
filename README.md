@@ -100,12 +100,12 @@ Every clinical section follows the same chain — learn this once and you can na
 
 | File | Contents |
 |---|---|
-| `patients.php` | Patient list, `GET /api/patients/search` (autocomplete JSON), `POST /patients`, `PUT /patients/{patient}`, and one GET per record tab + `GET /patients/{patient}` (history). All behind `auth` + `verified`. |
+| `patients.php` | Patient list, `GET /api/patients/search` (autocomplete JSON), `POST /patients`, `PUT /patients/{patient}`, one GET per record tab + `GET /patients/{patient}` (history), plus the archive routes: `DELETE /patients/{patient}` (archive), `GET /patients/archived`, `POST /patients/{patient}/restore`. All behind `auth` + `verified`. |
 | `appointments.php` | `Route::resource('appointments')` limited to index/store/update/destroy. |
 | `auth.php`, `settings.php` | Starter-kit Fortify/settings routes. |
 | `console.php` | Default artisan console route. |
 
-There is **no** patient delete route and no per-section API — by design so far, not an oversight to 'fix' silently.
+There is no per-section API — by design so far, not an oversight to 'fix' silently. Patient "deletion" is archive-only (soft delete, see Data model); there is no hard-delete route.
 
 ## Data model
 
@@ -122,6 +122,17 @@ A patient's clinical record is **not** normalized into visits or per-section tab
 | `estrabograma` | Estrabograma | Strabismus diagram annotations: canvas `shapes` (issue #5) plus the legacy form's fields (`campo_1`…`campo_26`, `observaciones`), which remain readable for older records. |
 
 Practical consequences of the JSONB approach: adding a field to a section is a TS-schema + form change only (no migration), but the backend accepts any array shape — `UpdatePatientRequest` validates sections as just `nullable|array`, so the TS schema is the real contract. Keep schemas accurate.
+
+### Archiving patients (issue #9)
+
+`Patient` uses Laravel `SoftDeletes` (`deleted_at` column). Archiving a patient (edit dialog → **Archivar paciente**, `DELETE /patients/{patient}`):
+
+- hides the patient from the default list, the search API, and the appointment-form patient picker;
+- **deletes their future appointments** (`starts_at > now`) — an explicit product decision, stated in the confirmation dialog (which shows how many will be wiped). Restoring does **not** bring them back;
+- keeps past appointments in the database (surfaces such as the calendar feed and "Citas próximas" exclude archived patients' appointments via `whereHas('patient')`);
+- preserves the clinical record and the full activity history — restoring (`POST /patients/{patient}/restore`, from the **Archivados** view at `GET /patients/archived`) brings everything back untouched.
+
+Archived patients' record/history routes return 404, and new appointments cannot be created for them.
 
 ### Clinical history (versions)
 
@@ -157,7 +168,7 @@ Follow the existing pattern exactly:
 
 ## Tests
 
-Pest suite in `tests/` (sqlite in-memory, configured in `phpunit.xml`). Domain coverage: `PatientCreationTest`, `PatientUpdateTest`, `PatientAntecedentesFormTest`, `PatientOftalmologicosFormTest`, `PatientRefraccionFormTest`, `AppointmentsTest` (including overlap rejection), `PatientActivityLogTest` (logging + snapshot behavior). Auth/settings tests and `tests/Unit/Rules/` (RFC/CURP) come from the starter template. `tests/Feature/Documents/` is an empty leftover directory.
+Pest suite in `tests/` (sqlite in-memory, configured in `phpunit.xml`). Domain coverage: `PatientCreationTest`, `PatientUpdateTest`, `PatientArchiveTest` (archive visibility, future-appointment wipe, restore), `PatientAntecedentesFormTest`, `PatientOftalmologicosFormTest`, `PatientRefraccionFormTest`, `AppointmentsTest` (including overlap rejection), `PatientActivityLogTest` (logging + snapshot behavior). Auth/settings tests and `tests/Unit/Rules/` (RFC/CURP) come from the starter template. `tests/Feature/Documents/` is an empty leftover directory.
 
 ## Known issues & unfinished work
 
@@ -166,7 +177,7 @@ Pest suite in `tests/` (sqlite in-memory, configured in `phpunit.xml`). Domain c
 - **Ángulo Iridocorneal is a stub** — see the tab table above.
 - **`/canvas-test` is public** (registered in `web.php` without auth middleware) and renders an external stock photo. Remove or protect before deploying.
 - **Registration is fully open** — anyone can create a doctor account. Fine for local dev; gate it before production.
-- **No patient deletion** and appointments hard-delete (`destroy` actually deletes the row).
+- ~~**No patient deletion**~~ — resolved by archiving (issue #9): patients soft-delete/archive only; appointments still hard-delete (`destroy` actually deletes the row), and archiving a patient wipes their future appointments.
 
 ## Template leftovers
 
@@ -178,6 +189,7 @@ What deliberately stays:
 
 ## Notes for agents
 
+- **Migration rule (while the project is in dev, until Manuel says otherwise):** do NOT create incremental/alter migrations. Schema changes are made by editing the original `create_*_table` migration file, then wiping and reseeding the local database (`php artisan migrate:fresh --seed`). All current data is test data, so this is safe by design.
 - Do not read, print, or commit `.env`. Configuration lives in `config/` and `.env.example`.
 - Never hand-edit `resources/js/routes/**` or `resources/js/wayfinder/**` — they are generated from the PHP routes.
 - `vendor/` and `node_modules/` are installed dependencies, not source.
