@@ -34,7 +34,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     <div
                                         className={cn(
                                             'flex items-center gap-x-2',
-                                            !isActive && 'text-primary/70',
+                                            !isActive && 'text-white/70',
                                         )}
                                     >
                                         {item.icon && (
@@ -44,7 +44,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     </div>
                                     <div
                                         className={cn(
-                                            'relative w-1 self-stretch bg-lumax-purple',
+                                            'relative w-1 self-stretch bg-white',
                                             !isActive && 'hidden',
                                         )}
                                     />

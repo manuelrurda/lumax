@@ -23,7 +23,7 @@ interface TodaysAppointmentsProps {
 export function TodaysAppointments({ appointments }: TodaysAppointmentsProps) {
     return (
         <div className="mb-8">
-            <h2 className="mb-4 text-xl font-bold">Citas próximas</h2>
+            <h2 className="mb-4 text-xl font-bold text-lumax-purple">Citas próximas</h2>
             <div className="rounded-md border bg-card">
                 <Table>
                     <TableHeader>

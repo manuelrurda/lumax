@@ -41,8 +41,8 @@ export const Toolbar = ({ tool, setTool, color, setColor, onUndo, onRedo, canUnd
                 <button 
                     onClick={onClick}
                     disabled={disabled}
-                    className={`p-2 rounded hover:bg-slate-100 transition-colors ${
-                        isActive ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600'
+                    className={`p-2 rounded hover:bg-lumax-purple/10 transition-colors ${
+                        isActive ? 'bg-lumax-purple/10 text-lumax-purple' : 'text-lumax-purple/70'
                     } ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent' : ''}`}
                 >
                     <Icon className="w-5 h-5" strokeWidth={2.5} />
@@ -83,13 +83,13 @@ export const Toolbar = ({ tool, setTool, color, setColor, onUndo, onRedo, canUnd
                         onClick={() => setTool('text')} 
                     />
                     
-                    <div className="w-6 h-px bg-slate-200 my-1" />
+                    <div className="w-6 h-px bg-lumax-purple/20 my-1" />
                     
                     <Popover>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <PopoverTrigger asChild>
-                                    <button className="p-2 rounded hover:bg-slate-100 transition-colors flex items-center justify-center">
+                                    <button className="p-2 rounded hover:bg-lumax-purple/10 transition-colors flex items-center justify-center">
                                         <div 
                                             className="w-5 h-5 rounded-full border border-slate-200 shadow-sm"
                                             style={{ backgroundColor: color }}

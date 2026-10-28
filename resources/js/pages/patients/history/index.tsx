@@ -72,7 +72,7 @@ export default function PatientHistoryPage() {
             <div className="flex h-full flex-1 flex-col p-6">
                 <div className="mb-8 flex items-start justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                        <h1 className="text-3xl font-bold tracking-tight text-lumax-purple">
                             Historial Clínico de {patient.first_name} {patient.last_name}
                         </h1>
                         <p className="mt-2 text-sm text-muted-foreground">

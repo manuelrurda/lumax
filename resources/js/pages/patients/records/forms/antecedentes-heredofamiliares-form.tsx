@@ -34,7 +34,7 @@ export function AntecedentesHeredofamiliaresForm({ register, control, watch }: F
             
             <div className="grid gap-4">
                 {heredofamiliaresList.map(({ key, label }) => (
-                    <div key={key} className="flex flex-col md:flex-row md:items-center gap-4 p-4 border rounded-lg bg-gray-50/50">
+                    <div key={key} className="flex flex-col md:flex-row md:items-center gap-4 p-4 border rounded-lg bg-lumax-purple/5">
                         <div className="flex-1 basis-[35%]">
                             <Label className="text-base font-medium">{label}</Label>
                         </div>
@@ -98,7 +98,7 @@ export function AntecedentesHeredofamiliaresForm({ register, control, watch }: F
                     {fieldsHeredo.map((field, index) => (
                         <div
                             key={field.id}
-                            className="flex items-start gap-4 rounded-lg border bg-gray-50/50 p-4"
+                            className="flex items-start gap-4 rounded-lg border bg-lumax-purple/5 p-4"
                         >
                             <div className="flex-1 space-y-2">
                                 <Label>Enfermedad</Label>
