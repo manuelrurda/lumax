@@ -32,12 +32,13 @@ composer install
 npm install
 cp .env.example .env
 php artisan key:generate
-# set DB_* in .env if not using the default sqlite database
+# DB_* in .env.example point at a local PostgreSQL; for a throwaway local db,
+# set DB_CONNECTION=sqlite and DB_DATABASE to a sqlite file path instead
 php artisan migrate --seed
 composer run dev   # serves Laravel + queue listener + logs + Vite together
 ```
 
-`npm run dev` alone only starts Vite. The seeded users (local dev only, password is `password` for all) are `test@example.com` (20 patients), `house@example.com` (5) and `strange@example.com` (15) — see `database/seeders/DatabaseSeeder.php`. Public registration is also open at `/register` and requires an RFC (validated as 13 characters only).
+`npm run dev` alone only starts Vite. The seeded users (local dev only, password is `password` for all) are `test@example.com` (20 patients), `house@example.com` (5) and `strange@example.com` (15) — see `database/seeders/DatabaseSeeder.php`. Registration at `/register` is gated by an email allowlist (`REGISTRATION_ALLOWED_EMAILS` in `.env`, comma-separated; empty = registration closed for everyone) and requires a valid RFC.
 
 Useful commands:
 
@@ -48,6 +49,19 @@ npm run lint             # eslint --fix
 npm run format:check     # prettier check over resources/
 npm run build           # production assets
 ```
+
+## Database
+
+**Production runs PostgreSQL** (managed — the live instance is on Neon). Local development may use SQLite for speed, CI runs the suite on in-memory SQLite, and `.env.example` defaults to Postgres.
+
+Why the engine is not interchangeable here: a patient's clinical sections live in `jsonb` columns (see [Data model](#data-model)). PostgreSQL is the only engine in play where `jsonb` is a real, queryable binary type — Laravel maps the same migration to plain text storage on SQLite/MySQL, so behavior can diverge silently between dev and production. For that reason the full suite is also verified against a real Postgres: as of this change, `migrate:fresh --seed` runs clean and **all 168 Pest tests pass on PostgreSQL 17.5 (UTF8), with totals identical to SQLite**. To repeat the check, point the standard `DB_*` environment variables at any Postgres and run `php artisan test` — real environment variables take precedence over the SQLite defaults pinned in `phpunit.xml`.
+
+Two operational notes:
+
+- **The database encoding must be UTF8.** Clinical text is Spanish with accents stored inside JSON; against a legacy `SQL_ASCII` cluster, writes containing `\uXXXX`-escaped JSON fail with `unsupported Unicode escape sequence` (verified during the Postgres check above — the app code was fine, the cluster encoding was not). Neon's databases are UTF8, so this only bites hand-rolled local clusters: pass `-E UTF8` to `initdb`.
+- **Backups** come from the managed provider: Neon offers point-in-time restore within the plan's retention window, so a bad deploy or accidental wipe is recoverable without self-hosted backup plumbing. An independent copy is one `pg_dump` away, using the same connection string as the app.
+
+Schema changes follow the project's dev rule: while the data is still test data, edit the original create-table migration and re-run `php artisan migrate:fresh --seed` instead of adding incremental migrations.
 
 ## How the app is organized
 
@@ -165,7 +179,7 @@ Pest suite in `tests/` (sqlite in-memory, configured in `phpunit.xml`). Domain c
 - **Appointment patient ownership:** `AppointmentsController` validates `patient_id` as `exists:patients,id` only. A doctor can attach *another doctor's* patient to their own appointment. Scope it to the authenticated user's patients (patients themselves are correctly owner-scoped everywhere else).
 - **Ángulo Iridocorneal is a stub** — see the tab table above.
 - **`/canvas-test` is public** (registered in `web.php` without auth middleware) and renders an external stock photo. Remove or protect before deploying.
-- **Registration is fully open** — anyone can create a doctor account. Fine for local dev; gate it before production.
+- **Registration is allowlist-gated** — only emails listed in `REGISTRATION_ALLOWED_EMAILS` can create a doctor account; with the list empty, registration is closed entirely.
 - **No patient deletion** and appointments hard-delete (`destroy` actually deletes the row).
 
 ## Template leftovers
