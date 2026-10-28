@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\UploadThingService;
+use App\Support\EmailAllowlist;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -46,9 +48,13 @@ class HandleInertiaRequests extends Middleware
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
-                'error'   => fn () => $request->session()->get('error'),
+                'error' => fn () => $request->session()->get('error'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'bugReports' => [
+                'canAccess' => EmailAllowlist::fromConfig('bug-reports.allowed_emails')->allows($request->user()),
+                'uploadsEnabled' => app(UploadThingService::class)->configured(),
+            ],
         ];
     }
 }

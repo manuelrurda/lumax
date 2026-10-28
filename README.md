@@ -132,6 +132,40 @@ Practical consequences of the JSONB approach: adding a field to a section is a T
 
 An earlier version of the history page claimed the versions comply with NOM-024. That claim was audited in issue #12, found unsubstantiated, and removed — the page now describes the version history factually. See [docs/nom-024-audit.md](docs/nom-024-audit.md) for what the implementation does, the gaps, and what claiming conformance would require.
 
+## Bug & feature reports (in-app)
+
+The sidebar footer has a persistent **«Reportar problema»** button (mounted once in `components/app-sidebar.tsx`, so it shows on every authenticated page). It opens a dialog (`components/bug-report/bug-report-dialog.tsx`) where the doctor picks a type — **Error** (`bug`) or **Mejora o función nueva** (`mejora`) — and writes a description; the title is auto-generated server-side from the first line of the description. On submit the app automatically attaches context an agent needs to act on the report:
+
+- the page it was sent from: `page_path`, `page_url`, the Inertia `page_component`, and the `viewport` size;
+- the browser `user_agent` (read server-side from the request header);
+- a **screenshot of the page** captured in the browser with `html-to-image` *before* the dialog opens (so the dialog is never in the shot), plus up to 4 user-attached files (images or PDF, 8 MB each).
+
+Reports are listed at `GET /bug-reports` with a detail page at `GET /bug-reports/{id}` (also in the sidebar as «Reportes»). Access is restricted to a configurable email allowlist; signed-in users who are not allowlisted cannot see the sidebar entries or reach the routes (see **Access control** below).
+
+**Storage:** two tables — `bug_reports` (`user_id`, `type`, `title`, `description`, `page_path`, `page_url`, `page_component`, `user_agent`, `viewport`, `status` starting at `nuevo`, timestamps) and `bug_report_attachments` (`bug_report_id`, `kind` = `screenshot` | `attachment`, `file_url`, `file_name`, `file_type`, `file_size`). To read pending work, query `bug_reports` where `status = 'nuevo'` ordered by `created_at`, joining `bug_report_attachments` for the screenshot/file URLs.
+
+**Files need UploadThing.** Attachment binaries are stored on UploadThing via `app/Services/UploadThingService.php` (v6 API: `uploadFiles` presign → PUT to the presigned URL → poll `pollUpload/{key}`). Set `UPLOADTHING_TOKEN` in `.env` to enable them. **Without the token the feature still works**: reports are saved with all their context, just without screenshot/attachments, and the dialog warns the user about it (the `bugReports.uploadsEnabled` shared Inertia prop drives that state).
+
+### Access control (allowlist)
+
+Bug reports can contain screenshots and details from clinical pages, so the feature is **closed by default**. Set the comma-separated `BUG_REPORT_ALLOWED_EMAILS` environment variable with the addresses that may submit and view reports, for example:
+
+```dotenv
+BUG_REPORT_ALLOWED_EMAILS=doctor@example.com,admin@example.com
+```
+
+To grant or revoke access, edit that value in the deployment environment and refresh the application configuration (redeploy, or clear/rebuild the Laravel config cache). Matching is case-insensitive. **If the variable is empty or missing, nobody can access Reportes — including administrators — so set it before deploying.**
+
+The generic implementation is `app/Support/EmailAllowlist.php`: it accepts the raw string/array/null configuration value and is the single place that normalizes it (split on commas, trim, lowercase, deduplicate, and drop empty/non-string entries). Bug reports read their list from `config/bug-reports.php` (`bug-reports.allowed_emails`), which stores the raw `BUG_REPORT_ALLOWED_EMAILS` string.
+
+Access is enforced in three layers:
+
+1. The `bug-reports.access` middleware (`EnsureBugReportAccess`) rejects non-allowlisted users with HTTP 403 on the index, detail, and store routes.
+2. `BugReportPolicy` repeats the check through `Gate::authorize()` in `BugReportController@index`, `show`, and `store` as defense in depth.
+3. The shared Inertia prop `bugReports.canAccess` tells the sidebar to render the «Reportar problema» button and «Reportes» nav item only for allowlisted users, so other users never see dead UI.
+
+To reuse the pattern for another feature, give it its own config key (for example `feature-name.allowed_emails`), construct `EmailAllowlist::fromConfig('feature-name.allowed_emails')`, and apply the same middleware/policy/UI-prop pattern with that feature's own access rules.
+
 ## Record tabs: what actually persists
 
 | Tab | State |
