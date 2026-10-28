@@ -12,7 +12,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type PaginatedData, type Patient } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { ExternalLink, Search, Trash2 } from 'lucide-react';
+import { Archive, ExternalLink, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreatePatientDialog } from './ui/create-patient-dialog';
 import { EditPatientDialog } from './ui/edit-patient-dialog';
@@ -91,6 +91,13 @@ export default function PatientsPage() {
                             />
                         </div>
                     </div>
+                    <Button
+                        variant="outline"
+                        onClick={() => router.get('/patients/archived')}
+                    >
+                        <Archive className="h-4 w-4" />
+                        Archivados
+                    </Button>
                     <CreatePatientDialog />
                 </div>
 

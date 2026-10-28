@@ -18,7 +18,13 @@ class PatientsController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = $request->user()->patients()->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at');
+        $query = $request->user()->patients()
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'updated_at')
+            // Surfaced in the archive confirmation so the doctor knows
+            // exactly how many future appointments archiving will wipe.
+            ->withCount(['appointments as future_appointments_count' => function ($q) {
+                $q->where('starts_at', '>', now());
+            }]);
 
         if ($request->filled('search')) {
             $search = strtolower($request->search);
@@ -47,6 +53,10 @@ class PatientsController extends Controller
 
         $todaysAppointments = $request->user()->appointments()
             ->with('patient')
+            // Past appointments of archived patients stay in the DB but
+            // must not surface here; whereHas respects the patient's
+            // soft-delete scope.
+            ->whereHas('patient')
             ->where('starts_at', '>=', now())
             ->where('starts_at', '<', now()->addDay()->startOfDay())
             ->orderBy('starts_at')
@@ -56,6 +66,23 @@ class PatientsController extends Controller
             'patients' => $patients,
             'filters' => (object) $request->only(['search', 'sort']),
             'todaysAppointments' => $todaysAppointments,
+        ]);
+    }
+
+    /**
+     * Display the user's archived (soft-deleted) patients.
+     */
+    public function archived(Request $request): Response
+    {
+        $patients = $request->user()->patients()
+            ->onlyTrashed()
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'deleted_at')
+            ->orderByDesc('deleted_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('patients/archived', [
+            'patients' => $patients,
         ]);
     }
 
@@ -244,5 +271,45 @@ class PatientsController extends Controller
         $patient->update($request->validated());
 
         return back()->with('message', 'Paciente actualizado exitosamente.');
+    }
+
+    /**
+     * Archive the specified patient (soft delete, issue #9).
+     *
+     * The clinical record and its activity history are preserved and the
+     * patient can be restored, but their future appointments are wiped —
+     * that is an explicit product decision, stated in the confirmation UI.
+     * Past appointments stay in the database.
+     */
+    public function destroy(Request $request, Patient $patient): RedirectResponse
+    {
+        if ($patient->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        DB::transaction(function () use ($patient) {
+            $patient->appointments()
+                ->where('starts_at', '>', now())
+                ->delete();
+
+            $patient->delete();
+        });
+
+        return redirect()->route('patients')->with('message', 'Paciente archivado exitosamente.');
+    }
+
+    /**
+     * Restore an archived patient. Wiped future appointments are NOT
+     * brought back; past appointments and history were never removed.
+     */
+    public function restore(Request $request, $id): RedirectResponse
+    {
+        $patient = Patient::withTrashed()
+            ->where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $patient->restore();
+
+        return back()->with('message', 'Paciente restaurado exitosamente.');
     }
 }
