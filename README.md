@@ -32,12 +32,13 @@ composer install
 npm install
 cp .env.example .env
 php artisan key:generate
-# set DB_* in .env if not using the default sqlite database
+# DB_* in .env.example point at a local PostgreSQL; for a throwaway local db,
+# set DB_CONNECTION=sqlite and DB_DATABASE to a sqlite file path instead
 php artisan migrate --seed
 composer run dev   # serves Laravel + queue listener + logs + Vite together
 ```
 
-`npm run dev` alone only starts Vite. The seeded users (local dev only, password is `password` for all) are `test@example.com` (20 patients), `house@example.com` (5) and `strange@example.com` (15) — see `database/seeders/DatabaseSeeder.php`. Public registration is also open at `/register` and requires an RFC (validated as 13 characters only).
+`npm run dev` alone only starts Vite. The seeded users (local dev only, password is `password` for all) are `test@example.com` (20 patients), `house@example.com` (5) and `strange@example.com` (15) — see `database/seeders/DatabaseSeeder.php`. Registration at `/register` is gated by an email allowlist (`REGISTRATION_ALLOWED_EMAILS` in `.env`, comma-separated; empty = registration closed for everyone) and requires a valid RFC.
 
 Useful commands:
 
@@ -48,6 +49,19 @@ npm run lint             # eslint --fix
 npm run format:check     # prettier check over resources/
 npm run build           # production assets
 ```
+
+## Database
+
+**Production runs PostgreSQL** (managed — the live instance is on Neon). Local development may use SQLite for speed, CI runs the suite on in-memory SQLite, and `.env.example` defaults to Postgres.
+
+Why the engine is not interchangeable here: a patient's clinical sections live in `jsonb` columns (see [Data model](#data-model)). PostgreSQL is the only engine in play where `jsonb` is a real, queryable binary type — Laravel maps the same migration to plain text storage on SQLite/MySQL, so behavior can diverge silently between dev and production. For that reason the full suite is also verified against a real Postgres: as of this change, `migrate:fresh --seed` runs clean and **all 168 Pest tests pass on PostgreSQL 17.5 (UTF8), with totals identical to SQLite**. To repeat the check, point the standard `DB_*` environment variables at any Postgres and run `php artisan test` — real environment variables take precedence over the SQLite defaults pinned in `phpunit.xml`.
+
+Two operational notes:
+
+- **The database encoding must be UTF8.** Clinical text is Spanish with accents stored inside JSON; against a legacy `SQL_ASCII` cluster, writes containing `\uXXXX`-escaped JSON fail with `unsupported Unicode escape sequence` (verified during the Postgres check above — the app code was fine, the cluster encoding was not). Neon's databases are UTF8, so this only bites hand-rolled local clusters: pass `-E UTF8` to `initdb`.
+- **Backups** come from the managed provider: Neon offers point-in-time restore within the plan's retention window, so a bad deploy or accidental wipe is recoverable without self-hosted backup plumbing. An independent copy is one `pg_dump` away, using the same connection string as the app.
+
+Schema changes follow the project's dev rule: while the data is still test data, edit the original create-table migration and re-run `php artisan migrate:fresh --seed` instead of adding incremental migrations.
 
 ## How the app is organized
 
@@ -143,6 +157,40 @@ Archived patients' record/history routes return 404, and new appointments cannot
 
 An earlier version of the history page claimed the versions comply with NOM-024. That claim was audited in issue #12, found unsubstantiated, and removed — the page now describes the version history factually. See [docs/nom-024-audit.md](docs/nom-024-audit.md) for what the implementation does, the gaps, and what claiming conformance would require.
 
+## Bug & feature reports (in-app)
+
+The sidebar footer has a persistent **«Reportar problema»** button (mounted once in `components/app-sidebar.tsx`, so it shows on every authenticated page). It opens a dialog (`components/bug-report/bug-report-dialog.tsx`) where the doctor picks a type — **Error** (`bug`) or **Mejora o función nueva** (`mejora`) — and writes a description; the title is auto-generated server-side from the first line of the description. On submit the app automatically attaches context an agent needs to act on the report:
+
+- the page it was sent from: `page_path`, `page_url`, the Inertia `page_component`, and the `viewport` size;
+- the browser `user_agent` (read server-side from the request header);
+- a **screenshot of the page** captured in the browser with `html-to-image` *before* the dialog opens (so the dialog is never in the shot), plus up to 4 user-attached files (images or PDF, 8 MB each).
+
+Reports are listed at `GET /bug-reports` with a detail page at `GET /bug-reports/{id}` (also in the sidebar as «Reportes»). Access is restricted to a configurable email allowlist; signed-in users who are not allowlisted cannot see the sidebar entries or reach the routes (see **Access control** below).
+
+**Storage:** two tables — `bug_reports` (`user_id`, `type`, `title`, `description`, `page_path`, `page_url`, `page_component`, `user_agent`, `viewport`, `status` starting at `nuevo`, timestamps) and `bug_report_attachments` (`bug_report_id`, `kind` = `screenshot` | `attachment`, `file_url`, `file_name`, `file_type`, `file_size`). To read pending work, query `bug_reports` where `status = 'nuevo'` ordered by `created_at`, joining `bug_report_attachments` for the screenshot/file URLs.
+
+**Files need UploadThing.** Attachment binaries are stored on UploadThing via `app/Services/UploadThingService.php` (v6 API: `uploadFiles` presign → PUT to the presigned URL → poll `pollUpload/{key}`). Set `UPLOADTHING_TOKEN` in `.env` to enable them. **Without the token the feature still works**: reports are saved with all their context, just without screenshot/attachments, and the dialog warns the user about it (the `bugReports.uploadsEnabled` shared Inertia prop drives that state).
+
+### Access control (allowlist)
+
+Bug reports can contain screenshots and details from clinical pages, so the feature is **closed by default**. Set the comma-separated `BUG_REPORT_ALLOWED_EMAILS` environment variable with the addresses that may submit and view reports, for example:
+
+```dotenv
+BUG_REPORT_ALLOWED_EMAILS=doctor@example.com,admin@example.com
+```
+
+To grant or revoke access, edit that value in the deployment environment and refresh the application configuration (redeploy, or clear/rebuild the Laravel config cache). Matching is case-insensitive. **If the variable is empty or missing, nobody can access Reportes — including administrators — so set it before deploying.**
+
+The generic implementation is `app/Support/EmailAllowlist.php`: it accepts the raw string/array/null configuration value and is the single place that normalizes it (split on commas, trim, lowercase, deduplicate, and drop empty/non-string entries). Bug reports read their list from `config/bug-reports.php` (`bug-reports.allowed_emails`), which stores the raw `BUG_REPORT_ALLOWED_EMAILS` string.
+
+Access is enforced in three layers:
+
+1. The `bug-reports.access` middleware (`EnsureBugReportAccess`) rejects non-allowlisted users with HTTP 403 on the index, detail, and store routes.
+2. `BugReportPolicy` repeats the check through `Gate::authorize()` in `BugReportController@index`, `show`, and `store` as defense in depth.
+3. The shared Inertia prop `bugReports.canAccess` tells the sidebar to render the «Reportar problema» button and «Reportes» nav item only for allowlisted users, so other users never see dead UI.
+
+To reuse the pattern for another feature, give it its own config key (for example `feature-name.allowed_emails`), construct `EmailAllowlist::fromConfig('feature-name.allowed_emails')`, and apply the same middleware/policy/UI-prop pattern with that feature's own access rules.
+
 ## Record tabs: what actually persists
 
 | Tab | State |
@@ -176,7 +224,7 @@ Pest suite in `tests/` (sqlite in-memory, configured in `phpunit.xml`). Domain c
 - **Appointment patient ownership:** `AppointmentsController` validates `patient_id` as `exists:patients,id` only. A doctor can attach *another doctor's* patient to their own appointment. Scope it to the authenticated user's patients (patients themselves are correctly owner-scoped everywhere else).
 - **Ángulo Iridocorneal is a stub** — see the tab table above.
 - **`/canvas-test` is public** (registered in `web.php` without auth middleware) and renders an external stock photo. Remove or protect before deploying.
-- **Registration is fully open** — anyone can create a doctor account. Fine for local dev; gate it before production.
+- **Registration is allowlist-gated** — only emails listed in `REGISTRATION_ALLOWED_EMAILS` can create a doctor account; with the list empty, registration is closed entirely.
 - ~~**No patient deletion**~~ — resolved by archiving (issue #9): patients soft-delete/archive only; appointments still hard-delete (`destroy` actually deletes the row), and archiving a patient wipes their future appointments.
 
 ## Template leftovers

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\EmailAllowlisted;
 use App\Rules\ValidRfc;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +36,7 @@ class RegisteredUserController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:80',
             'rfc' => ['required', 'string', 'size:13', new ValidRfc],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new EmailAllowlisted],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 

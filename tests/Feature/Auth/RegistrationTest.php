@@ -5,6 +5,18 @@ use Illuminate\Support\Facades\Log;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
+beforeEach(function () {
+    // Registration is gated by the allowlist (config/registration.php);
+    // allow every email used by the tests in this file.
+    config(['registration.allowed_emails' => implode(',', [
+        'test@example.com',
+        'john.doe@example.com',
+        'bad.rfc@example.com',
+        'wrong.digit@example.com',
+        'log.safety@example.com',
+    ])]);
+});
+
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
     $response->assertStatus(200);
